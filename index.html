@@ -400,6 +400,77 @@
       padding: 0 6px;
     }
 
+
+    .generated-response-list {
+      display: grid;
+      gap: 12px;
+      margin: 4px 0 0;
+    }
+
+    .generated-response-card {
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: #fff;
+      padding: 14px;
+      cursor: pointer;
+      transition: background 0.12s ease, border-color 0.12s ease, transform 0.12s ease;
+    }
+
+    .generated-response-card:hover,
+    .generated-response-card:focus-visible {
+      background: #fff8f1;
+      border-color: #d9b69f;
+      transform: translateY(-1px);
+      outline: none;
+    }
+
+    .generated-response-card h3 {
+      margin: 0;
+    }
+
+    .generated-response-card .pill {
+      cursor: inherit;
+    }
+
+    .created-response-copy-row {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 10px;
+      align-items: stretch;
+      margin-top: 10px;
+    }
+
+    .created-response-data {
+      width: 100%;
+      min-height: 58px;
+      margin: 0;
+      font-size: 13px;
+      word-break: break-all;
+    }
+
+    .created-response-actions {
+      display: flex;
+      align-items: stretch;
+      margin: 0;
+    }
+
+    .created-response-actions button {
+      height: 100%;
+      min-width: 128px;
+      white-space: nowrap;
+    }
+
+    .delete-created-response-btn {
+      flex: 0 0 auto;
+      padding: 7px 10px;
+      border-radius: 999px;
+      font-size: 13px;
+    }
+
+    .response-status-message {
+      margin: 8px 0 0;
+    }
+
     .empty {
       color: var(--muted);
       font-style: italic;
@@ -939,7 +1010,16 @@
         align-items: stretch;
       }
 
-      .delete-response-btn {
+      .created-response-copy-row {
+        grid-template-columns: 1fr;
+      }
+
+      .created-response-actions button {
+        min-width: 0;
+      }
+
+      .delete-response-btn,
+      .delete-created-response-btn {
         width: 34px;
         height: 34px;
         min-width: 34px;
@@ -950,7 +1030,8 @@
         align-self: flex-start;
       }
     
-      .delete-response-btn::before {
+      .delete-response-btn::before,
+      .delete-created-response-btn::before {
         content: "×";
         font-size: 20px;
         font-weight: 900;
@@ -1091,17 +1172,12 @@
       </div>
 
       <div class="toolbar">
-        <button id="resetPeerBtn" type="button" class="plain">타인 선택 초기화</button>
-        <button id="makeResponseBtn" type="button">응답 데이터 만들기</button>
+        <button id="makeResponseBtn" type="button">응답 데이터 만들기 및 복사</button>
       </div>
 
       <div id="responseArea" class="copy-panel" style="display:none;">
-        <h3>복사해서 전달할 응답 데이터</h3>
-        <p class="small">아래 내용을 복사해 결과를 확인할 사람에게 보내세요. 이름과 선택한 형용사 6개가 함께 들어 있습니다.</p>
-        <textarea id="responseData" readonly aria-label="응답 데이터"></textarea>
-        <div class="toolbar" style="margin:0;">
-          <button id="copyResponseBtn" type="button">응답 데이터 복사</button>
-        </div>
+        <h3>내 응답 모아보기</h3>
+        <div id="createdResponseSummary" class="generated-response-list" aria-live="polite"></div>
       </div>
     </section>
 
@@ -1258,11 +1334,24 @@
         peerSelectedTitle: "선택한 형용사",
         peerEmpty: "아직 선택한 형용사가 없습니다.",
         resetPeer: "타인 선택 초기화",
-        makeResponse: "응답 데이터 만들기",
+        makeResponse: "응답 데이터 만들기 및 복사",
         responseDataTitle: "복사해서 전달할 응답 데이터",
         responseDataHint: "아래 내용을 복사해 결과를 확인할 사람에게 보내세요. 이름과 선택한 형용사 6개가 함께 들어 있습니다.",
         responseDataLabel: "응답 데이터",
         copyResponse: "응답 데이터 복사",
+        createdResponseSummaryTitle: "내 응답 모아보기",
+        createdResponsesHint: "",
+        createdResponseSummaryComplete: "",
+        createdResponseSummaryHint: "",
+        createdResponseBoxTitle: "{respondent} → {target}",
+        createdResponseEmpty: "아직 만든 응답이 없습니다.",
+        deleteCreatedResponse: "선택 삭제",
+        deleteCreatedResponseAria: "{respondent}의 응답 박스 삭제",
+        confirmDeleteCreatedResponse: "{respondent}의 응답 박스를 삭제할까요?",
+        createdResponseLoadAria: "{respondent}의 응답 수정하기",
+        responseReadyStatus: "응답 데이터가 내 응답 모아보기에 저장되었습니다.",
+        responseNeedsRemake: "입력이나 선택이 수정되었습니다. 형용사를 6개로 맞춘 뒤 응답 데이터 만들기를 다시 눌러주세요.",
+        responseLoadedForEdit: "선택한 응답을 위쪽 입력 영역에 다시 불러왔습니다. 수정 후 응답 데이터 만들기를 다시 누르세요.",
         resultTitle: "결과 보기",
         resultHint: "타인이 보내준 응답 데이터를 붙여 넣으면, 각 사람이 누구에 대해 어떤 형용사를 골랐는지 모아보고 결과를 계산할 수 있습니다.",
         respondentBadge: "타인 응답 {count}명",
@@ -1401,11 +1490,24 @@
         peerSelectedTitle: "Selected adjectives",
         peerEmpty: "No adjectives have been selected yet.",
         resetPeer: "Reset peer selection",
-        makeResponse: "Create response data",
+        makeResponse: "Create and copy response data",
         responseDataTitle: "Response data to copy and share",
         responseDataHint: "Copy the text below and send it to the person who will view the results. It includes the names and the 6 selected adjectives.",
         responseDataLabel: "Response data",
         copyResponse: "Copy response data",
+        createdResponseSummaryTitle: "My Response Collection",
+        createdResponsesHint: "",
+        createdResponseSummaryComplete: "",
+        createdResponseSummaryHint: "",
+        createdResponseBoxTitle: "{respondent} → {target}",
+        createdResponseEmpty: "No response data has been created yet.",
+        deleteCreatedResponse: "Delete selection",
+        deleteCreatedResponseAria: "Delete {respondent}'s response box",
+        confirmDeleteCreatedResponse: "Delete {respondent}'s response box?",
+        createdResponseLoadAria: "Edit {respondent}'s response",
+        responseReadyStatus: "Response data has been saved to My Response Collection.",
+        responseNeedsRemake: "The names or selection were edited. Select exactly 6 adjectives, then click Create response data again.",
+        responseLoadedForEdit: "The selected response has been loaded back into the editing area above. After editing, click Create response data again.",
         resultTitle: "View Results",
         resultHint: "Paste response data sent by others to collect who selected which adjectives about whom and calculate the results.",
         respondentBadge: "Peer responses: {count}",
@@ -1518,6 +1620,7 @@
     const STORAGE_SELF = "johari:self:v3";
     const STORAGE_SELF_NAME = "johari:selfName:v3";
     const STORAGE_RESPONSES = "johari:responses:v3";
+    const STORAGE_CREATED_RESPONSES = "johari:createdResponses:v1";
     const STORAGE_LANG = "johari:lang:v1";
     const RESPONSE_PREFIX = "JOHARI_RESPONSE_V1:";
 
@@ -1526,6 +1629,9 @@
     let responses = [];
     let activeTab = "self";
     let currentLang = localStorage.getItem(STORAGE_LANG) || "ko";
+    let peerResponseStatus = "";
+    let createdResponseDrafts = [];
+    let editingCreatedResponseId = null;
     if (!I18N[currentLang]) currentLang = "ko";
 
     const $ = (selector) => document.querySelector(selector);
@@ -1632,6 +1738,36 @@
       }
     }
 
+    function saveCreatedResponses() {
+      localStorage.setItem(STORAGE_CREATED_RESPONSES, JSON.stringify(createdResponseDrafts));
+    }
+
+    function loadCreatedResponses() {
+      try {
+        const raw = JSON.parse(localStorage.getItem(STORAGE_CREATED_RESPONSES) || "[]");
+        createdResponseDrafts = raw
+          .filter(r => r && Array.isArray(r.picks))
+          .map(r => ({
+            id: String(r.id || makeId()),
+            respondentName: compactName(r.respondentName || ""),
+            targetName: compactName(r.targetName || ""),
+            picks: normalizePicks(r.picks),
+            data: makeLegacyResponseData({
+              id: String(r.id || makeId()),
+              respondentName: compactName(r.respondentName || ""),
+              targetName: compactName(r.targetName || ""),
+              picks: normalizePicks(r.picks),
+              createdAt: r.createdAt || new Date().toISOString()
+            }),
+            createdAt: r.createdAt || new Date().toISOString(),
+            updatedAt: r.updatedAt || r.createdAt || new Date().toISOString()
+          }))
+          .filter(r => r.picks.length === MAX_PICKS);
+      } catch (e) {
+        createdResponseDrafts = [];
+      }
+    }
+
     function makeId() {
       return `r${Date.now().toString(36)}${Math.random().toString(36).slice(2, 8)}`;
     }
@@ -1695,12 +1831,8 @@
       setAttr("#targetNameInput", "placeholder", t("targetPlaceholder"));
       setAttr("#peerBoard", "aria-label", t("peerBoardLabel"));
       setText("#tab-peer .selected-box h3", t("peerSelectedTitle"));
-      setText("#resetPeerBtn", t("resetPeer"));
       setText("#makeResponseBtn", t("makeResponse"));
-      setText("#responseArea h3", t("responseDataTitle"));
-      setText("#responseArea .small", t("responseDataHint"));
-      setAttr("#responseData", "aria-label", t("responseDataLabel"));
-      setText("#copyResponseBtn", t("copyResponse"));
+      setText("#responseArea h3", t("createdResponseSummaryTitle"));
 
       setText("#tab-result .section-title h2", t("resultTitle"));
       setText("#tab-result > .hint", t("resultHint"));
@@ -1736,10 +1868,7 @@
         saveSelf();
       } else {
         peerPicks = next;
-        const responseArea = $("#responseArea");
-        const responseData = $("#responseData");
-        if (responseArea) responseArea.style.display = "none";
-        if (responseData) responseData.value = "";
+        invalidatePeerResponse();
       }
       renderAll();
     }
@@ -1797,22 +1926,40 @@
       renderPickBox("#peerSelectedBox", peerPicks, "peerEmpty");
     }
 
-    function makeResponseData() {
-      const respondentName = getRespondentName();
-      const targetName = getTargetName();
+    function compactName(value) {
+      return String(value || "").replace(/[\t\r\n]+/g, " ").replace(/\s+/g, " ").trim();
+    }
+
+    function stableHash(value) {
+      let hash = 2166136261;
+      const text = String(value || "");
+      for (let i = 0; i < text.length; i += 1) {
+        hash ^= text.charCodeAt(i);
+        hash = Math.imul(hash, 16777619);
+      }
+      return (hash >>> 0).toString(36);
+    }
+
+    function makeLegacyResponseData(options = {}) {
+      const respondentName = compactName(options.respondentName ?? getRespondentName());
+      const targetName = compactName(options.targetName ?? getTargetName());
+      const picks = normalizePicks(options.picks ?? peerPicks);
       const payload = {
         type: "johari-response",
         version: 1,
-        id: makeId(),
+        id: String(options.id || makeId()),
         respondentName,
         targetName,
-        picks: normalizePicks(peerPicks),
-        selectedWords: normalizePicks(peerPicks).map(idx => ({ ko: ADJECTIVES[idx].ko, en: ADJECTIVES[idx].en })),
-        createdAt: new Date().toISOString()
+        picks,
+        createdAt: options.createdAt || new Date().toISOString()
       };
       const json = JSON.stringify(payload);
       const b64 = btoa(unescape(encodeURIComponent(json)));
       return `${RESPONSE_PREFIX}${b64}`;
+    }
+
+    function makeResponseData(options = {}) {
+      return makeLegacyResponseData(options);
     }
 
     function extractResponseCandidates(raw) {
@@ -1835,12 +1982,104 @@
         throw new Error(t("importMissingPicks"));
       }
       return {
-        id: String(data.id || makeId()),
+        id: String(data.id || `legacy-${stableHash(input)}`),
         respondentName: String(data.respondentName || "").trim(),
         targetName: String(data.targetName || "").trim(),
         picks,
         createdAt: data.createdAt || new Date().toISOString()
       };
+    }
+
+    function responseAreaIsVisible() {
+      return createdResponseDrafts.length > 0;
+    }
+
+    function updateCopyResponseButton() {
+      // Copy buttons are rendered inside each saved response box.
+    }
+
+    function invalidatePeerResponse() {
+      if (editingCreatedResponseId) {
+        peerResponseStatus = t("responseNeedsRemake");
+      }
+    }
+
+    function clearPeerEditForm() {
+      $("#respondentNameInput").value = "";
+      $("#targetNameInput").value = "";
+      peerPicks = [];
+      editingCreatedResponseId = null;
+    }
+
+    function findCreatedResponse(id) {
+      return createdResponseDrafts.find(item => item.id === id) || null;
+    }
+
+    function loadCreatedResponseDraft(id) {
+      const draft = findCreatedResponse(id);
+      if (!draft) return;
+      $("#respondentNameInput").value = draft.respondentName;
+      $("#targetNameInput").value = draft.targetName;
+      peerPicks = normalizePicks(draft.picks);
+      editingCreatedResponseId = draft.id;
+      peerResponseStatus = t("responseLoadedForEdit");
+      renderAll();
+    }
+
+    function deleteCreatedResponseDraft(id) {
+      const draft = findCreatedResponse(id);
+      if (!draft) return;
+      const respondent = displayName(draft.respondentName, "noName");
+      if (!confirm(t("confirmDeleteCreatedResponse", { respondent }))) return;
+      createdResponseDrafts = createdResponseDrafts.filter(item => item.id !== id);
+      if (editingCreatedResponseId === id) {
+        clearPeerEditForm();
+        peerResponseStatus = "";
+      }
+      saveCreatedResponses();
+      renderAll();
+    }
+
+    function renderCreatedResponseSummary() {
+      const responseArea = $("#responseArea");
+      const box = $("#createdResponseSummary");
+      if (!responseArea || !box) return;
+
+      if (!createdResponseDrafts.length) {
+        responseArea.style.display = "none";
+        box.innerHTML = "";
+        return;
+      }
+
+      responseArea.style.display = "grid";
+      const status = peerResponseStatus
+        ? `<p class="small response-status-message">${escapeHTML(peerResponseStatus)}</p>`
+        : "";
+
+      box.innerHTML = createdResponseDrafts.map((draft, index) => {
+        const respondent = displayName(draft.respondentName, "noName");
+        const target = displayName(draft.targetName, "noTarget");
+        const title = t("createdResponseBoxTitle", { respondent, target });
+        const pills = normalizePicks(draft.picks)
+          .map(idx => `<span class="pill">${adjectiveStackHTML(idx)}</span>`)
+          .join("");
+        const activeClass = editingCreatedResponseId === draft.id ? " selected" : "";
+        return `
+          <article class="generated-response-card${activeClass}" role="button" tabindex="0" data-created-response-id="${escapeHTML(draft.id)}" aria-label="${escapeHTML(t("createdResponseLoadAria", { respondent }))}">
+            <div class="response-card-head">
+              <h3>${escapeHTML(`${index + 1}. ${title}`)}</h3>
+              <button type="button" class="danger delete-created-response-btn" data-delete-created-response="${escapeHTML(draft.id)}" aria-label="${escapeHTML(t("deleteCreatedResponseAria", { respondent }))}">${escapeHTML(t("deleteCreatedResponse"))}</button>
+            </div>
+            <div class="pill-list">${pills}</div>
+            <div class="created-response-copy-row">
+              <textarea class="created-response-data" readonly aria-label="${escapeHTML(t("responseDataLabel"))}">${escapeHTML(draft.data)}</textarea>
+              <div class="created-response-actions">
+                <button type="button" data-copy-created-response="${escapeHTML(draft.id)}">${escapeHTML(t("copyResponse"))}</button>
+              </div>
+            </div>
+          </article>
+        `;
+      }).join("") + status;
     }
 
     async function copyToClipboard(text) {
@@ -2290,6 +2529,8 @@
       $("#peerCount").textContent = t("pickCount", { count: peerPicks.length, max: MAX_PICKS });
       $("#goPeerBtn").disabled = false;
       $("#makeResponseBtn").disabled = false;
+      renderCreatedResponseSummary();
+      updateCopyResponseButton();
       if (activeTab === "result") renderResults();
     }
 
@@ -2378,8 +2619,14 @@
         renderAll();
       });
 
-      $("#respondentNameInput").addEventListener("input", renderAll);
-      $("#targetNameInput").addEventListener("input", renderAll);
+      $("#respondentNameInput").addEventListener("input", () => {
+        invalidatePeerResponse();
+        renderAll();
+      });
+      $("#targetNameInput").addEventListener("input", () => {
+        invalidatePeerResponse();
+        renderAll();
+      });
 
       $("#resetSelfBtn").addEventListener("click", () => {
         if (!confirm(t("confirmResetSelf"))) return;
@@ -2397,14 +2644,8 @@
         setActiveTab("peer");
       });
 
-      $("#resetPeerBtn").addEventListener("click", () => {
-        peerPicks = [];
-        $("#responseArea").style.display = "none";
-        $("#responseData").value = "";
-        renderAll();
-      });
 
-      $("#makeResponseBtn").addEventListener("click", () => {
+      $("#makeResponseBtn").addEventListener("click", async () => {
         const respondentName = getRespondentName();
         const targetName = getTargetName();
         if (!respondentName || !targetName) {
@@ -2415,12 +2656,68 @@
           alert(t("alertPeerPick", { max: MAX_PICKS, count: peerPicks.length }));
           return;
         }
-        const data = makeResponseData();
-        $("#responseData").value = data;
-        $("#responseArea").style.display = "grid";
+        const respondentNameClean = compactName(respondentName);
+        const targetNameClean = compactName(targetName);
+        const picks = normalizePicks(peerPicks);
+        const now = new Date().toISOString();
+        const draftId = editingCreatedResponseId || makeId();
+        const existingIndex = createdResponseDrafts.findIndex(item => item.id === draftId);
+        const createdAt = existingIndex >= 0 ? (createdResponseDrafts[existingIndex].createdAt || now) : now;
+        const data = makeResponseData({
+          id: draftId,
+          respondentName: respondentNameClean,
+          targetName: targetNameClean,
+          picks,
+          createdAt
+        });
+        const draft = {
+          id: draftId,
+          respondentName: respondentNameClean,
+          targetName: targetNameClean,
+          picks,
+          data,
+          createdAt,
+          updatedAt: now
+        };
+        if (existingIndex >= 0) {
+          createdResponseDrafts[existingIndex] = draft;
+        } else {
+          createdResponseDrafts.push(draft);
+        }
+        saveCreatedResponses();
+        await copyToClipboard(data);
+        peerResponseStatus = t("responseReadyStatus");
+        clearPeerEditForm();
+        renderAll();
       });
 
-      $("#copyResponseBtn").addEventListener("click", () => copyToClipboard($("#responseData").value));
+      $("#createdResponseSummary").addEventListener("click", (e) => {
+        const deleteBtn = e.target.closest("[data-delete-created-response]");
+        if (deleteBtn) {
+          e.stopPropagation();
+          deleteCreatedResponseDraft(deleteBtn.dataset.deleteCreatedResponse);
+          return;
+        }
+        const copyBtn = e.target.closest("[data-copy-created-response]");
+        if (copyBtn) {
+          e.stopPropagation();
+          const draft = findCreatedResponse(copyBtn.dataset.copyCreatedResponse);
+          if (draft) copyToClipboard(draft.data);
+          return;
+        }
+        if (e.target.closest(".created-response-data")) return;
+        const card = e.target.closest("[data-created-response-id]");
+        if (card) loadCreatedResponseDraft(card.dataset.createdResponseId);
+      });
+
+      $("#createdResponseSummary").addEventListener("keydown", (e) => {
+        if (e.key !== "Enter" && e.key !== " ") return;
+        const card = e.target.closest("[data-created-response-id]");
+        if (!card) return;
+        e.preventDefault();
+        loadCreatedResponseDraft(card.dataset.createdResponseId);
+      });
+
       $("#exportImageBtn").addEventListener("click", exportResultAsImage);
 
       $("#importBtn").addEventListener("click", () => {
@@ -2452,6 +2749,7 @@
       bindControls();
       loadSelf();
       loadResponses();
+      loadCreatedResponses();
       applyLanguage();
       renderAll();
     }
