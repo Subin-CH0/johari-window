@@ -523,6 +523,56 @@
       margin-top: 10px;
     }
 
+    .response-collapsible {
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      background: #fff;
+      padding: 0;
+      overflow: hidden;
+    }
+
+    .response-collapsible summary {
+      list-style: none;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 16px;
+      cursor: pointer;
+      user-select: none;
+      background: #fff7ef;
+    }
+
+    .response-collapsible summary::-webkit-details-marker {
+      display: none;
+    }
+
+    .response-collapsible summary::after {
+      content: "⌄";
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 999px;
+      padding: 6px 10px;
+      background: var(--primary-soft);
+      color: var(--primary-dark);
+      font-size: 13px;
+      font-weight: 900;
+      white-space: nowrap;
+    }
+
+    .response-collapsible[open] summary::after {
+      content: "⌃";
+    }
+
+    .response-collapsible h3 {
+      margin: 0;
+    }
+
+    .response-collapsible-body {
+      padding: 0 16px 16px;
+    }
+
     .self-response-top {
       margin: 16px 0 18px;
       background: linear-gradient(180deg, #fffaf4 0%, #ffffff 100%);
@@ -1064,25 +1114,6 @@
 
       <div id="selfResponseTop" class="response-card self-response-top" aria-live="polite"></div>
 
-      <div class="guide-grid" aria-label="조하리의 창 네 영역 설명">
-        <article class="guide-item">
-          <h3>열린 창</h3>
-          <p>나도 알고 타인도 아는 특성입니다. 자기인식과 타인의 인식이 만나는 영역입니다.</p>
-        </article>
-        <article class="guide-item">
-          <h3>보이지 않는 창</h3>
-          <p>나는 선택하지 않았지만 타인은 알아본 특성입니다. 피드백을 통해 발견할 수 있습니다.</p>
-        </article>
-        <article class="guide-item">
-          <h3>숨겨진 창</h3>
-          <p>나는 알고 있지만 타인에게는 덜 드러난 특성입니다. 자기노출과 관련됩니다.</p>
-        </article>
-        <article class="guide-item">
-          <h3>미지의 창</h3>
-          <p>나도 타인도 선택하지 않은 특성입니다. 아직 탐색되지 않았거나 해당성이 낮은 영역입니다.</p>
-        </article>
-      </div>
-
       <div class="grid-2">
         <div>
           <h3>응답 데이터 붙여넣기</h3>
@@ -1094,9 +1125,14 @@
           <div id="importMsg" class="small"></div>
         </div>
         <div>
-          <h3>가져온 응답</h3>
-          <p id="resultStateMsg" class="notice warn">본인 선택과 타인 응답을 준비하세요.</p>
-          <div id="responseList"></div>
+          <details id="importedResponsesDetails" class="response-collapsible">
+            <summary>
+              <h3 id="importedResponsesTitle">가져온 응답 (0개)</h3>
+            </summary>
+            <div class="response-collapsible-body">
+              <div id="responseList"></div>
+            </div>
+          </details>
         </div>
       </div>
 
@@ -1248,6 +1284,7 @@
         exportLibraryMissing: "이미지 저장 라이브러리를 불러오지 못했습니다. 인터넷 연결을 확인하거나 html2canvas 파일을 로컬로 포함하세요.",
         exportImageError: "이미지 저장 중 오류가 발생했습니다.",
         importedResponsesTitle: "가져온 응답",
+        importedResponsesTitleWithCount: "가져온 응답 ({count}개)",
         resultPrepareMsg: "본인 선택과 타인 응답을 준비하세요.",
         selfResponseTitle: "본인 응답",
         selfResponseComplete: "{name}이/가 본인을 잘 나타낸다고 선택한 형용사 6개입니다.",
@@ -1257,10 +1294,10 @@
         responseDeleteButton: "선택 삭제",
         responseDeleteAria: "{name} 응답 삭제",
         responseDescription: "{respondent}이/가 {target}을/를 잘 나타낸다고 선택한 형용사",
-        openDesc: "본인도 선택했고 타인도 선택한 특성",
-        blindDesc: "본인은 선택하지 않았지만 타인이 선택한 특성",
-        hiddenDesc: "본인은 선택했지만 타인은 선택하지 않은 특성",
-        unknownDesc: "본인과 타인 모두 선택하지 않은 특성",
+        openDesc: "나도 알고 타인도 아는 특성입니다. 자기인식과 타인의 인식이 만나는 영역입니다.",
+        blindDesc: "나는 선택하지 않았지만 타인은 알아본 특성입니다. 피드백을 통해 발견할 수 있습니다.",
+        hiddenDesc: "나는 알고 있지만 타인에게는 덜 드러난 특성입니다. 자기노출과 관련됩니다.",
+        unknownDesc: "나도 타인도 선택하지 않은 특성입니다. 아직 탐색되지 않았거나 해당성이 낮은 영역입니다.",
         noneInQuadrant: "해당 형용사가 없습니다.",
         adjectiveCount: "{count}개",
         quadrantAdjectiveCount: "형용사 수: {count}개",
@@ -1283,9 +1320,9 @@
         typeBasis: "유형 기준",
         comparisonTableLabel: "창별 합산 개수 비교",
         tableWindowType: "창 / 연결 유형",
-        tableWindowSize: "창 크기<br><span class=\"small\">형용사 수</span>",
-        tableSelectionSum: "선택 합산",
-        typeSummaryNote: "유형 판정은 열린 창·보이지 않는 창·숨겨진 창은 선택 합산의 기대 대비 완화 비율로, 미지의 창은 선택되지 않은 형용사 수의 기대 대비 완화 비율로 산출합니다: (실제+0.5)/(기대+0.5).",
+        tableWindowSize: "창 크기<br><span class=\"small\">형용사 종류</span>",
+        tableSelectionSum: <br><span class=\"small\">선택 합산</span>,
+        typeSummaryNote: "유형은 창 크기의 기대 대비 완화 비율로 산출합니다: (실제+0.5)/(기대+0.5).",
         typeExplanationTitle: "네 가지 유형 설명",
         typeOpenDesc: "나와 타인이 함께 인식하는 특성이 많은 유형입니다. 자기표현과 피드백 수용이 비교적 균형을 이루며, 관계에서 투명성과 친밀감이 높게 나타날 수 있습니다.",
         typeBlindDesc: "타인은 알아보지만 나는 덜 인식하는 특성이 많은 유형입니다. 솔직하고 표현력이 있어 보일 수 있으나, 타인의 피드백을 통해 자기인식을 보완하는 과정이 중요합니다.",
@@ -1390,6 +1427,7 @@
         exportLibraryMissing: "The image export library could not be loaded. Check your internet connection or include html2canvas locally.",
         exportImageError: "An error occurred while saving the image.",
         importedResponsesTitle: "Imported responses",
+        importedResponsesTitleWithCount: "Imported responses ({count})",
         resultPrepareMsg: "Prepare your self selection and peer responses.",
         selfResponseTitle: "Self response",
         selfResponseComplete: "{name} selected these 6 adjectives as self-descriptive.",
@@ -1399,10 +1437,10 @@
         responseDeleteButton: "Delete selection",
         responseDeleteAria: "Delete {name}’s response",
         responseDescription: "{respondent} selected these adjectives as describing {target}.",
-        openDesc: "Traits selected by both you and others",
-        blindDesc: "Traits not selected by you but selected by others",
-        hiddenDesc: "Traits selected by you but not selected by others",
-        unknownDesc: "Traits selected by neither you nor others",
+        openDesc: "Traits known by both you and others. This area is where self-awareness and others’ perceptions meet.",
+        blindDesc: "Traits you did not select but others recognized. These can be discovered through feedback.",
+        hiddenDesc: "Traits you know about yourself but that are less visible to others. This area is related to self-disclosure.",
+        unknownDesc: "Traits selected by neither you nor others. These may be unexplored or less relevant in this context.",
         noneInQuadrant: "No adjectives in this area.",
         adjectiveCount: "{count}",
         quadrantAdjectiveCount: "Adjective count: {count}",
@@ -1425,9 +1463,9 @@
         typeBasis: "Type basis",
         comparisonTableLabel: "Comparison of totals by window area",
         tableWindowType: "Area / linked type",
-        tableWindowSize: "Area size<br><span class=\"small\">adjective count</span>",
-        tableSelectionSum: "Selection total",
-        typeSummaryNote: "The type classification uses a smoothed observed-to-expected ratio for selection totals in the Open, Blind, and Hidden areas, while the Unknown area uses the count of unselected adjectives: (observed + 0.5) / (expected + 0.5).",
+        tableWindowSize: "Area size<br><span class=\"small\">adjective type count</span>",
+        tableSelectionSum: <br><span class=\"small\">adjective token count</span>,
+        typeSummaryNote: "The type classification uses a smoothed observed-to-expected ratio for Area size: (observed + 0.5) / (expected + 0.5).",
         typeExplanationTitle: "Four type descriptions",
         typeOpenDesc: "A type with many traits recognized by both self and others. Self-expression and receptiveness to feedback are relatively balanced, and relationships may show transparency and closeness.",
         typeBlindDesc: "A type with many traits others notice but the self recognizes less. The person may appear direct and expressive, while feedback from others is important for improving self-awareness.",
@@ -1666,22 +1704,6 @@
 
       setText("#tab-result .section-title h2", t("resultTitle"));
       setText("#tab-result > .hint", t("resultHint"));
-      const guideGrid = $(".guide-grid");
-      if (guideGrid) guideGrid.setAttribute("aria-label", t("guideLabel"));
-      const guides = [
-        ["openTitle", "openGuide"],
-        ["blindTitle", "blindGuide"],
-        ["hiddenTitle", "hiddenGuide"],
-        ["unknownTitle", "unknownGuide"]
-      ];
-      $$("#tab-result > .guide-grid .guide-item").forEach((item, idx) => {
-        const [titleKey, descKey] = guides[idx] || guides[0];
-        const h3 = item.querySelector("h3");
-        const p = item.querySelector("p");
-        if (h3) h3.textContent = t(titleKey);
-        if (p) p.textContent = t(descKey);
-      });
-
       const importColumn = $("#importBox")?.closest("div");
       if (importColumn) {
         const h3 = importColumn.querySelector("h3");
@@ -1691,11 +1713,7 @@
       setText("#importBtn", t("importBtn"));
       setText("#clearRespondentsBtn", t("clearRespondents"));
       setText("#exportImageBtn", t("exportImage"));
-      const importedColumn = $("#resultStateMsg")?.closest("div");
-      if (importedColumn) {
-        const h3 = importedColumn.querySelector("h3");
-        if (h3) h3.textContent = t("importedResponsesTitle");
-      }
+      setText("#importedResponsesTitle", t("importedResponsesTitleWithCount", { count: responses.length }));
 
       const footerNote = $("footer > p");
       if (footerNote) footerNote.textContent = t("footerNote");
@@ -1968,7 +1986,12 @@
       `;
     }
 
+    function updateImportedResponsesTitle() {
+      setText("#importedResponsesTitle", t("importedResponsesTitleWithCount", { count: responses.length }));
+    }
+
     function renderResponseList() {
+      updateImportedResponsesTitle();
       if (!responses.length) {
         $("#responseList").innerHTML = `<p class="empty">${escapeHTML(t("noResponses"))}</p>`;
         return;
@@ -2228,12 +2251,11 @@
     function renderResults() {
       loadResponses();
       $("#respondentBadge").textContent = t("respondentBadge", { count: responses.length });
+      updateImportedResponsesTitle();
       renderSelfResponseTop();
       renderResponseList();
 
       if (selfPicks.length !== MAX_PICKS) {
-        $("#resultStateMsg").className = "notice warn";
-        $("#resultStateMsg").textContent = t("resultNeedSelf");
         $("#typeSummary").style.display = "none";
         const overlapSummary = $("#overlapSummary");
         if (overlapSummary) {
@@ -2242,14 +2264,6 @@
         }
         $("#quadrants").innerHTML = "";
         return;
-      }
-
-      if (responses.length === 0) {
-        $("#resultStateMsg").className = "notice warn";
-        $("#resultStateMsg").textContent = t("resultNeedPeer");
-      } else {
-        $("#resultStateMsg").className = "notice ok";
-        $("#resultStateMsg").textContent = t("resultDone", { count: responses.length });
       }
 
       const windows = computeQuadrants();
@@ -2310,12 +2324,10 @@
         sheet = document.createElement("div");
         sheet.className = "export-sheet card";
 
-        const stateText = $("#resultStateMsg")?.textContent || "";
         sheet.innerHTML = `
           <div class="export-header">
             <h1 class="export-title">${escapeHTML(t("pageTitle"))}</h1>
             <h2 class="export-subtitle">${escapeHTML(t("resultTitle"))}</h2>
-            <p class="small">${escapeHTML(stateText)}</p>
           </div>
         `;
 
