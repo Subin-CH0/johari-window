@@ -763,9 +763,23 @@
       }
 
       .delete-response-btn {
-        width: 100%;
+        width: 34px;
+        height: 34px;
+        min-width: 34px;
+        padding: 0;
+        border-radius: 999px;
+        font-size: 0;
+        line-height: 1;
+        align-self: flex-start;
       }
-
+    
+      .delete-response-btn::before {
+        content: "×";
+        font-size: 20px;
+        font-weight: 900;
+        line-height: 1;
+      }
+      
       .pill {
         border-radius: 14px;
         align-items: center;
