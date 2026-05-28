@@ -549,6 +549,60 @@
       font-size: 13px;
     }
 
+    .overlap-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+      margin-top: 14px;
+    }
+
+    .overlap-section {
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: #fff;
+      padding: 14px;
+      min-width: 0;
+    }
+
+    .overlap-section h3 {
+      font-size: 16px;
+      margin-bottom: 7px;
+    }
+
+    .match-list {
+      display: grid;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .match-item {
+      border-top: 1px dashed var(--line);
+      padding-top: 10px;
+    }
+
+    .match-item:first-child {
+      border-top: 0;
+      padding-top: 0;
+    }
+
+    .match-title {
+      font-weight: 900;
+      margin-bottom: 6px;
+    }
+
+    .match-count {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 999px;
+      padding: 4px 9px;
+      background: var(--accent-soft);
+      color: #445f39;
+      font-size: 12px;
+      font-weight: 900;
+      margin-left: 6px;
+      white-space: nowrap;
+    }
 
 
     .guide-grid {
@@ -658,7 +712,8 @@
       .name-grid,
       .grid-2,
       .result-grid,
-      .guide-grid {
+      .guide-grid,
+      .overlap-grid {
         grid-template-columns: 1fr;
       }
 
@@ -813,11 +868,43 @@
         grid-template-columns: 1fr !important;
       }
     }
+
+    .language-switch {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+
+    .language-switch .lang-btn {
+      width: auto;
+      padding: 9px 13px;
+      border-radius: 999px;
+      font-size: 14px;
+    }
+
+    .language-switch .lang-btn.active {
+      background: var(--primary);
+      color: #fff;
+      border-color: var(--primary);
+      box-shadow: 0 6px 14px rgba(183, 104, 69, 0.18);
+    }
+
+    .english-only {
+      color: var(--text);
+      font-weight: 820;
+      font-size: 15px;
+    }
+
   </style>
 </head>
 
 <body>
   <header class="wrap">
+    <div class="language-switch" aria-label="언어 선택 / Language selection">
+      <button id="langKoBtn" class="plain lang-btn active" data-lang="ko" type="button">한국어</button>
+      <button id="langEnBtn" class="plain lang-btn" data-lang="en" type="button">English</button>
+    </div>
     <h1>조하리의 창(Johari's Window)</h1>
     <p class="subtitle">본인이 고른 6개 형용사와 타인이 고른 6개 형용사를 비교해 열린 창, 보이지 않는 창, 숨겨진 창, 미지의 창을 자동으로 정리합니다.</p>
   </header>
@@ -942,6 +1029,7 @@
 
       <div id="quadrants" class="result-grid"></div>
       <div id="typeSummary" class="summary-card bottom-summary" style="display:none;"></div>
+      <div id="overlapSummary" class="summary-card bottom-summary" style="display:none;"></div>
     </section>
 
     <footer>
@@ -1022,24 +1110,327 @@
       { en: "witty", ko: "재치 있는" }
     ];
 
+    const I18N = {
+      ko: {
+        pageTitle: "조하리의 창(Johari's Window)",
+        subtitle: "본인이 고른 6개 형용사와 타인이 고른 6개 형용사를 비교해 열린 창, 보이지 않는 창, 숨겨진 창, 미지의 창을 자동으로 정리합니다.",
+        tabSelf: "1. 본인 선택",
+        tabPeer: "2. 타인 선택",
+        tabResult: "3. 결과 보기",
+        tabListLabel: "조하리의 창 단계",
+        selfTitle: "본인 선택",
+        selfHint: "아래 56개 형용사 중 본인을 잘 나타내는 형용사 6개를 클릭하세요. 다시 클릭하면 선택이 해제됩니다. 선택 개수는 이동 버튼을 누를 때 확인합니다.",
+        selfNameLabel: "내 이름",
+        selfNamePlaceholder: "예: 김민지",
+        selfBoardLabel: "본인 선택 형용사 목록",
+        selfSelectedTitle: "내가 선택한 형용사",
+        selfEmpty: "아직 선택한 형용사가 없습니다.",
+        resetSelf: "본인 선택 초기화",
+        goPeer: "타인 선택으로 이동",
+        peerTitle: "타인 선택",
+        peerHint: "응답자는 자신의 이름과 평가 대상의 이름을 입력한 뒤, 그 사람을 잘 나타낸다고 생각하는 형용사 6개를 선택하세요. 선택 개수는 응답 데이터 만들기 버튼을 누를 때 확인합니다.",
+        respondentNameLabel: "본인 이름",
+        respondentRole: "응답자",
+        targetNameLabel: "타인 이름",
+        targetRole: "평가 대상",
+        respondentPlaceholder: "예: 이서준",
+        targetPlaceholder: "예: 김민지",
+        peerPromptBlank: "타인 이름을 입력하면 선택 문구가 표시됩니다.",
+        peerPromptTarget: "{target}을/를 잘 나타낸다고 생각하는 형용사 6개를 선택하세요.",
+        peerBoardLabel: "타인 선택 형용사 목록",
+        peerSelectedTitle: "선택한 형용사",
+        peerEmpty: "아직 선택한 형용사가 없습니다.",
+        resetPeer: "타인 선택 초기화",
+        makeResponse: "응답 데이터 만들기",
+        responseDataTitle: "복사해서 전달할 응답 데이터",
+        responseDataHint: "아래 내용을 복사해 결과를 확인할 사람에게 보내세요. 이름과 선택한 형용사 6개가 함께 들어 있습니다.",
+        responseDataLabel: "응답 데이터",
+        copyResponse: "응답 데이터 복사",
+        resultTitle: "결과 보기",
+        resultHint: "타인이 보내준 응답 데이터를 붙여 넣으면, 각 사람이 누구에 대해 어떤 형용사를 골랐는지 모아보고 결과를 계산할 수 있습니다.",
+        respondentBadge: "타인 응답 {count}명",
+        guideLabel: "조하리의 창 네 영역 설명",
+        openTitle: "열린 창",
+        openGuide: "나도 알고 타인도 아는 특성입니다. 자기인식과 타인의 인식이 만나는 영역입니다.",
+        blindTitle: "보이지 않는 창",
+        blindGuide: "나는 선택하지 않았지만 타인은 알아본 특성입니다. 피드백을 통해 발견할 수 있습니다.",
+        hiddenTitle: "숨겨진 창",
+        hiddenGuide: "나는 알고 있지만 타인에게는 덜 드러난 특성입니다. 자기노출과 관련됩니다.",
+        unknownTitle: "미지의 창",
+        unknownGuide: "나도 타인도 선택하지 않은 특성입니다. 아직 탐색되지 않았거나 해당성이 낮은 영역입니다.",
+        importTitle: "응답 데이터 붙여넣기",
+        importPlaceholder: "여기에 타인이 복사해 보낸 응답 데이터를 붙여 넣으세요. 여러 개를 한꺼번에 붙여 넣어도 됩니다.",
+        importBtn: "응답 가져오기",
+        clearRespondents: "타인 응답 전체 삭제",
+        importedResponsesTitle: "가져온 응답",
+        resultPrepareMsg: "본인 선택과 타인 응답을 준비하세요.",
+        selfResponseTitle: "본인 응답",
+        selfResponseComplete: "{name}이/가 본인을 잘 나타낸다고 선택한 형용사 6개입니다.",
+        selfResponseIncomplete: "본인 선택이 아직 완료되지 않았습니다. 현재 {count} / {max}개 선택했습니다.",
+        noResponses: "아직 가져온 타인 응답이 없습니다.",
+        responseCardTitle: "{name}의 응답",
+        responseDeleteButton: "선택 삭제",
+        responseDeleteAria: "{name} 응답 삭제",
+        responseDescription: "{respondent}이/가 {target}을/를 잘 나타낸다고 선택한 형용사",
+        openDesc: "본인도 선택했고 타인도 선택한 특성",
+        blindDesc: "본인은 선택하지 않았지만 타인이 선택한 특성",
+        hiddenDesc: "본인은 선택했지만 타인은 선택하지 않은 특성",
+        unknownDesc: "본인과 타인 모두 선택하지 않은 특성",
+        noneInQuadrant: "해당 형용사가 없습니다.",
+        adjectiveCount: "{count}개",
+        quadrantAdjectiveCount: "형용사 수: {count}개",
+        quadrantSelectionSum: "선택 합산: {count}회",
+        resultNeedSelf: "본인 선택 6개가 먼저 필요합니다.",
+        resultNeedPeer: "본인 선택은 완료되었습니다. 타인 응답 데이터를 가져오면 결과가 채워집니다.",
+        resultDone: "본인 선택 6개와 타인 응답 {count}명을 기준으로 계산했습니다.",
+        typeWaitingLabel: "타인 응답 대기",
+        typeWaitingText: "아직 타인 응답이 없어 유형을 판정하기 어렵습니다.",
+        typeOpen: "개방형",
+        typeBlind: "자기주장형",
+        typeHidden: "신중형",
+        typeUnknown: "고립형",
+        typeOpenText: "열린 창이 응답자 수를 고려한 기준보다 두드러지는 유형입니다. 자기인식과 타인의 인식이 비교적 잘 맞고, 자신의 특성이 관계 속에서 자연스럽게 드러나는 편입니다.",
+        typeBlindText: "보이지 않는 창이 응답자 수를 고려한 기준보다 두드러지는 유형입니다. 타인이 알아보는 모습이 본인의 자기인식에는 상대적으로 덜 포함되어 있을 수 있습니다. 피드백을 살펴보면 새로운 자기이해가 넓어질 수 있습니다.",
+        typeHiddenText: "숨겨진 창이 응답자 수를 고려한 기준보다 두드러지는 유형입니다. 스스로 알고 있는 특성에 비해 타인에게 드러나는 정도는 낮은 편입니다. 안전한 관계에서 자기표현을 조금씩 늘리면 열린 창이 넓어질 수 있습니다.",
+        typeUnknownText: "미지의 창이 응답자 수를 고려한 기준보다 두드러지는 유형입니다. 이번 선택 안에서는 본인과 타인 모두에게 뚜렷하게 포착되지 않은 특성이 상대적으로 많습니다. 다양한 상황에서의 상호작용과 자기탐색이 도움이 될 수 있습니다.",
+        typeSummaryTitle: "{name}유형: {label}",
+        typeSummaryTitleNoName: "유형: {label}",
+        typeBasis: "유형 기준",
+        comparisonTableLabel: "창별 합산 개수 비교",
+        tableWindowType: "창 / 연결 유형",
+        tableWindowSize: "창 크기<br><span class=\"small\">형용사 수</span>",
+        tableSelectionSum: "선택 합산",
+        typeSummaryNote: "유형 판정은 실제 형용사 수와 기대 형용사 수의 완화 비율((실제+0.5)/(기대+0.5))로 산출합니다. 표와 막대는 해석을 돕기 위한 실제 관측값입니다.",
+        typeExplanationTitle: "네 가지 유형 설명",
+        typeOpenDesc: "나와 타인이 함께 인식하는 특성이 많은 유형입니다. 자기표현과 피드백 수용이 비교적 균형을 이루며, 관계에서 투명성과 친밀감이 높게 나타날 수 있습니다.",
+        typeBlindDesc: "타인은 알아보지만 나는 덜 인식하는 특성이 많은 유형입니다. 솔직하고 표현력이 있어 보일 수 있으나, 타인의 피드백을 통해 자기인식을 보완하는 과정이 중요합니다.",
+        typeHiddenDesc: "나는 알고 있지만 타인에게는 덜 드러난 특성이 많은 유형입니다. 신중하고 조심스러운 장점이 있지만, 필요한 만큼 자신을 드러내면 관계의 깊이가 커질 수 있습니다.",
+        typeUnknownDesc: "나와 타인 모두 아직 뚜렷하게 선택하지 않은 특성이 많은 유형입니다. 자기탐색과 다양한 상호작용을 통해 새롭게 발견될 가능성이 큰 영역입니다.",
+        overlapSummaryTitle: "응답 겹침 비교",
+        overlapSummaryHint: "아래 비교는 각 사람이 고른 6개 형용사의 교집합 개수를 기준으로 계산합니다.",
+        overlapSelfPeerTitle: "나와 가장 겹치는 타인",
+        overlapSelfPeerHint: "본인 선택과 각 타인 응답을 비교해 가장 많이 겹친 응답자를 모두 표시합니다.",
+        overlapPeerPeerTitle: "타인끼리 가장 겹치는 조합",
+        overlapPeerPeerHint: "타인 응답자들끼리 서로 비교해 가장 많이 겹친 쌍을 모두 표시합니다.",
+        overlapLeastTitle: "가장 겹치지 않는 조합",
+        overlapLeastHint: "본인과 타인 전체를 모두 포함해 교집합이 가장 적은 쌍을 모두 표시합니다.",
+        overlapNeedResponses: "타인 응답이 들어오면 표시됩니다.",
+        overlapNeedTwoPeers: "타인 응답이 2명 이상일 때 표시됩니다.",
+        overlapNoCompleteDifferent: "완전히 다르게 답한 0개 겹침 조합은 없습니다. 아래는 가장 적게 겹친 조합입니다.",
+        overlapCompleteDifferent: "완전히 다르게 답한 조합입니다.",
+        overlapCount: "{count}개 겹침",
+        overlapNone: "겹치는 형용사 없음",
+        overlapWithSelf: "{name}",
+        overlapPair: "{a} ↔ {b}",
+        pickCount: "{count} / {max} 선택",
+        noName: "이름 없음",
+        noTarget: "대상 미입력",
+        selfNameMissing: "이름 미입력",
+        importEmptyData: "빈 데이터",
+        importWrongFormat: "응답 데이터 형식이 아님",
+        importMissingPicks: "응답 데이터에 6개 선택값이 없음",
+        importDuplicate: "이미 가져온 응답",
+        importFail: "가져오기 실패",
+        importResult: "가져온 응답 {ok}건.",
+        importFailedSuffix: " 실패 {count}건: {messages}",
+        alertCopied: "복사되었습니다.",
+        promptCopy: "아래 내용을 복사하세요.",
+        confirmResetSelf: "본인 선택을 초기화할까요?",
+        alertSelfPick: "본인을 나타내는 형용사를 정확히 {max}개 선택해 주세요. 현재 {count}개 선택했습니다.",
+        alertNames: "본인 이름과 타인 이름을 모두 입력해 주세요.",
+        alertPeerPick: "타인을 나타내는 형용사를 정확히 {max}개 선택해 주세요. 현재 {count}개 선택했습니다.",
+        confirmDeleteResponse: "{name}의 응답을 삭제할까요?",
+        confirmClearResponses: "가져온 타인 응답을 모두 삭제할까요?",
+        footerNote: "이 파일은 서버 없이 작동하는 정적 HTML입니다. 응답 데이터에는 입력한 이름과 선택 정보가 포함되므로, 민감한 개인정보 입력은 피하는 것이 좋습니다.",
+        referencesLabel: "참고문헌 및 출처",
+        referencesTitle: "참고문헌 및 출처",
+        referencesLast: "형용사 56개 목록과 네 영역 분류 방식은 공개 조하리의 창 활동지 및 설명 자료를 참고했습니다. 예: Parity Planner Johari Window worksheet, PsychSafety “The Johari Window”.",
+        langLabel: "언어 선택 / Language selection"
+      },
+      en: {
+        pageTitle: "Johari Window",
+        subtitle: "Compare the 6 adjectives you select with the 6 adjectives selected by others, then automatically organize the Open, Blind, Hidden, and Unknown areas.",
+        tabSelf: "1. Self Selection",
+        tabPeer: "2. Peer Selection",
+        tabResult: "3. View Results",
+        tabListLabel: "Johari Window steps",
+        selfTitle: "Self Selection",
+        selfHint: "Click 6 adjectives from the 56 adjectives below that best describe you. Click again to deselect. The selection count is checked when you move to the next step.",
+        selfNameLabel: "My name",
+        selfNamePlaceholder: "e.g., Minji Kim",
+        selfBoardLabel: "Self-selection adjective list",
+        selfSelectedTitle: "Adjectives I selected",
+        selfEmpty: "No adjectives have been selected yet.",
+        resetSelf: "Reset self selection",
+        goPeer: "Go to peer selection",
+        peerTitle: "Peer Selection",
+        peerHint: "The respondent should enter their own name and the target person's name, then select 6 adjectives they think best describe that person. The selection count is checked when creating response data.",
+        respondentNameLabel: "Your name",
+        respondentRole: "Respondent",
+        targetNameLabel: "Other person’s name",
+        targetRole: "Target",
+        respondentPlaceholder: "e.g., Seojun Lee",
+        targetPlaceholder: "e.g., Minji Kim",
+        peerPromptBlank: "Enter the other person’s name to show the selection prompt.",
+        peerPromptTarget: "Select 6 adjectives you think best describe {target}.",
+        peerBoardLabel: "Peer-selection adjective list",
+        peerSelectedTitle: "Selected adjectives",
+        peerEmpty: "No adjectives have been selected yet.",
+        resetPeer: "Reset peer selection",
+        makeResponse: "Create response data",
+        responseDataTitle: "Response data to copy and share",
+        responseDataHint: "Copy the text below and send it to the person who will view the results. It includes the names and the 6 selected adjectives.",
+        responseDataLabel: "Response data",
+        copyResponse: "Copy response data",
+        resultTitle: "View Results",
+        resultHint: "Paste response data sent by others to collect who selected which adjectives about whom and calculate the results.",
+        respondentBadge: "Peer responses: {count}",
+        guideLabel: "Four Johari Window area descriptions",
+        openTitle: "Open Area",
+        openGuide: "Traits known by both you and others. This area is where self-awareness and others’ perceptions meet.",
+        blindTitle: "Blind Area",
+        blindGuide: "Traits you did not select but others recognized. These can be discovered through feedback.",
+        hiddenTitle: "Hidden Area",
+        hiddenGuide: "Traits you know about yourself but that are less visible to others. This area is related to self-disclosure.",
+        unknownTitle: "Unknown Area",
+        unknownGuide: "Traits selected by neither you nor others. These may be unexplored or less relevant in this context.",
+        importTitle: "Paste response data",
+        importPlaceholder: "Paste the response data copied and sent by others here. You can paste multiple responses at once.",
+        importBtn: "Import responses",
+        clearRespondents: "Delete all peer responses",
+        importedResponsesTitle: "Imported responses",
+        resultPrepareMsg: "Prepare your self selection and peer responses.",
+        selfResponseTitle: "Self response",
+        selfResponseComplete: "{name} selected these 6 adjectives as self-descriptive.",
+        selfResponseIncomplete: "Self selection is not complete yet. Currently selected: {count} / {max}.",
+        noResponses: "No peer responses have been imported yet.",
+        responseCardTitle: "{name}’s response",
+        responseDeleteButton: "Delete selection",
+        responseDeleteAria: "Delete {name}’s response",
+        responseDescription: "{respondent} selected these adjectives as describing {target}.",
+        openDesc: "Traits selected by both you and others",
+        blindDesc: "Traits not selected by you but selected by others",
+        hiddenDesc: "Traits selected by you but not selected by others",
+        unknownDesc: "Traits selected by neither you nor others",
+        noneInQuadrant: "No adjectives in this area.",
+        adjectiveCount: "{count}",
+        quadrantAdjectiveCount: "Adjective count: {count}",
+        quadrantSelectionSum: "Selection total: {count}",
+        resultNeedSelf: "You need to select 6 self-descriptive adjectives first.",
+        resultNeedPeer: "Self selection is complete. Import peer response data to fill in the results.",
+        resultDone: "Calculated from your 6 self-selected adjectives and {count} peer response(s).",
+        typeWaitingLabel: "Waiting for peer responses",
+        typeWaitingText: "There are no peer responses yet, so the type cannot be determined reliably.",
+        typeOpen: "Open Type",
+        typeBlind: "Assertive Type",
+        typeHidden: "Cautious Type",
+        typeUnknown: "Isolated Type",
+        typeOpenText: "The Open Area stands out more than expected after accounting for the number of respondents. Your self-awareness and others’ perceptions are relatively aligned, and your traits tend to be expressed naturally in relationships.",
+        typeBlindText: "The Blind Area stands out more than expected after accounting for the number of respondents. Traits others notice may be less included in your own self-perception. Reviewing feedback can broaden self-understanding.",
+        typeHiddenText: "The Hidden Area stands out more than expected after accounting for the number of respondents. Compared with what you know about yourself, those traits may be less visible to others. Gradually increasing self-expression in safe relationships can expand the Open Area.",
+        typeUnknownText: "The Unknown Area stands out more than expected after accounting for the number of respondents. Within this selection, many traits were not clearly identified by either you or others. Self-exploration and interaction across varied situations may help.",
+        typeSummaryTitle: "{name} type: {label}",
+        typeSummaryTitleNoName: "Type: {label}",
+        typeBasis: "Type basis",
+        comparisonTableLabel: "Comparison of totals by window area",
+        tableWindowType: "Area / linked type",
+        tableWindowSize: "Area size<br><span class=\"small\">adjective count</span>",
+        tableSelectionSum: "Selection total",
+        typeSummaryNote: "The type classification uses a smoothed ratio of observed to expected adjective counts: (observed + 0.5) / (expected + 0.5). The table and bars show the observed values for interpretation.",
+        typeExplanationTitle: "Four type descriptions",
+        typeOpenDesc: "A type with many traits recognized by both self and others. Self-expression and receptiveness to feedback are relatively balanced, and relationships may show transparency and closeness.",
+        typeBlindDesc: "A type with many traits others notice but the self recognizes less. The person may appear direct and expressive, while feedback from others is important for improving self-awareness.",
+        typeHiddenDesc: "A type with many traits known to the self but less visible to others. Caution can be a strength, and appropriate self-disclosure can deepen relationships.",
+        typeUnknownDesc: "A type with many traits not clearly selected by either self or others. There is considerable room for new discovery through self-exploration and varied interactions.",
+        overlapSummaryTitle: "Response Overlap Comparison",
+        overlapSummaryHint: "The comparisons below are based on the number of shared adjectives between each person’s 6 selected adjectives.",
+        overlapSelfPeerTitle: "Peers most similar to me",
+        overlapSelfPeerHint: "Compares your self selection with each peer response and shows all respondents tied for the highest overlap.",
+        overlapPeerPeerTitle: "Most similar peer pairs",
+        overlapPeerPeerHint: "Compares peer respondents with each other and shows all pairs tied for the highest overlap.",
+        overlapLeastTitle: "Least overlapping pairs",
+        overlapLeastHint: "Includes both you and all peers, then shows all pairs with the fewest shared adjectives.",
+        overlapNeedResponses: "This will appear after peer responses are imported.",
+        overlapNeedTwoPeers: "This appears when there are at least 2 peer responses.",
+        overlapNoCompleteDifferent: "There are no completely different pairs with 0 shared adjectives. The pairs below have the lowest overlap.",
+        overlapCompleteDifferent: "These pairs answered completely differently.",
+        overlapCount: "{count} shared",
+        overlapNone: "No shared adjectives",
+        overlapWithSelf: "{name}",
+        overlapPair: "{a} ↔ {b}",
+        pickCount: "{count} / {max} selected",
+        noName: "No name",
+        noTarget: "No target entered",
+        selfNameMissing: "Name not entered",
+        importEmptyData: "Empty data",
+        importWrongFormat: "Not a valid response-data format",
+        importMissingPicks: "The response data does not contain 6 selected values",
+        importDuplicate: "Response already imported",
+        importFail: "Import failed",
+        importResult: "Imported responses: {ok}.",
+        importFailedSuffix: " Failed: {count}. Reasons: {messages}",
+        alertCopied: "Copied.",
+        promptCopy: "Copy the text below.",
+        confirmResetSelf: "Reset your self selection?",
+        alertSelfPick: "Please select exactly {max} adjectives that describe you. You currently selected {count}.",
+        alertNames: "Please enter both your name and the other person’s name.",
+        alertPeerPick: "Please select exactly {max} adjectives that describe the other person. You currently selected {count}.",
+        confirmDeleteResponse: "Delete {name}’s response?",
+        confirmClearResponses: "Delete all imported peer responses?",
+        footerNote: "This is a static HTML file that works without a server. Response data includes entered names and selection information, so avoid entering sensitive personal information.",
+        referencesLabel: "References and sources",
+        referencesTitle: "References and sources",
+        referencesLast: "The 56-adjective list and four-area classification method were adapted from publicly available Johari Window worksheets and explanatory materials, including the Parity Planner Johari Window worksheet and PsychSafety “The Johari Window”.",
+        langLabel: "Language selection"
+      }
+    };
+
     const MAX_PICKS = 6;
     const STORAGE_SELF = "johari:self:v3";
     const STORAGE_SELF_NAME = "johari:selfName:v3";
     const STORAGE_RESPONSES = "johari:responses:v3";
+    const STORAGE_LANG = "johari:lang:v1";
     const RESPONSE_PREFIX = "JOHARI_RESPONSE_V1:";
 
     let selfPicks = [];
     let peerPicks = [];
     let responses = [];
     let activeTab = "self";
+    let currentLang = localStorage.getItem(STORAGE_LANG) || "ko";
+    if (!I18N[currentLang]) currentLang = "ko";
 
     const $ = (selector) => document.querySelector(selector);
     const $$ = (selector) => Array.from(document.querySelectorAll(selector));
+
+    function t(key, vars = {}) {
+      const source = I18N[currentLang][key] ?? I18N.ko[key] ?? key;
+      return String(source).replace(/\{(\w+)\}/g, (_, name) => vars[name] ?? "");
+    }
 
     function escapeHTML(str) {
       return String(str ?? "").replace(/[&<>'"]/g, ch => ({
         "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;"
       }[ch]));
+    }
+
+    function setText(selector, value) {
+      const el = $(selector);
+      if (el) el.textContent = value;
+    }
+
+    function setAttr(selector, attr, value) {
+      const el = $(selector);
+      if (el) el.setAttribute(attr, value);
+    }
+
+    function setLabelText(inputSelector, labelText, smallText = null) {
+      const input = $(inputSelector);
+      if (!input) return;
+      const label = input.closest("label");
+      if (!label) return;
+      if (label.childNodes.length) label.childNodes[0].nodeValue = `${labelText} `;
+      const small = label.querySelector(".small");
+      if (small && smallText !== null) small.textContent = smallText;
     }
 
     function normalizePicks(picks) {
@@ -1069,6 +1460,14 @@
       return $("#targetNameInput").value.trim();
     }
 
+    function displayName(value, fallbackKey) {
+      const raw = String(value || "").trim();
+      if (!raw || raw === "이름 없음" || raw === "No name") return t(fallbackKey || "noName");
+      if (raw === "대상 미입력" || raw === "No target entered") return t("noTarget");
+      if (raw === "이름 미입력" || raw === "Name not entered") return t("selfNameMissing");
+      return raw;
+    }
+
     function saveSelf() {
       localStorage.setItem(STORAGE_SELF, encodePicks(selfPicks));
       localStorage.setItem(STORAGE_SELF_NAME, getSelfName());
@@ -1093,8 +1492,8 @@
           .filter(r => r && Array.isArray(r.picks))
           .map(r => ({
             id: String(r.id || makeId()),
-            respondentName: String(r.respondentName || "이름 없음"),
-            targetName: String(r.targetName || "대상 미입력"),
+            respondentName: String(r.respondentName || ""),
+            targetName: String(r.targetName || ""),
             picks: normalizePicks(r.picks),
             createdAt: r.createdAt || new Date().toISOString()
           }))
@@ -1116,6 +1515,102 @@
       if (tab === "result") renderResults();
     }
 
+    function setLanguage(lang) {
+      if (!I18N[lang]) return;
+      currentLang = lang;
+      localStorage.setItem(STORAGE_LANG, currentLang);
+      applyLanguage();
+      renderAll();
+    }
+
+    function applyLanguage() {
+      document.documentElement.lang = currentLang;
+      document.title = t("pageTitle");
+
+      $$(".lang-btn").forEach(btn => {
+        btn.classList.toggle("active", btn.dataset.lang === currentLang);
+        btn.setAttribute("aria-pressed", String(btn.dataset.lang === currentLang));
+      });
+      const languageSwitch = $(".language-switch");
+      if (languageSwitch) languageSwitch.setAttribute("aria-label", t("langLabel"));
+
+      setText("header h1", t("pageTitle"));
+      setText(".subtitle", t("subtitle"));
+
+      const tabs = { self: t("tabSelf"), peer: t("tabPeer"), result: t("tabResult") };
+      Object.entries(tabs).forEach(([key, label]) => {
+        const btn = $(`.tab-btn[data-tab="${key}"]`);
+        if (btn) btn.textContent = label;
+      });
+      const tabList = $(".tabs");
+      if (tabList) tabList.setAttribute("aria-label", t("tabListLabel"));
+
+      setText("#tab-self h2", t("selfTitle"));
+      setText("#tab-self .hint", t("selfHint"));
+      setLabelText("#selfNameInput", t("selfNameLabel"));
+      setAttr("#selfNameInput", "placeholder", t("selfNamePlaceholder"));
+      setAttr("#selfBoard", "aria-label", t("selfBoardLabel"));
+      setText("#tab-self .selected-box h3", t("selfSelectedTitle"));
+      setText("#resetSelfBtn", t("resetSelf"));
+      setText("#goPeerBtn", t("goPeer"));
+
+      setText("#tab-peer h2", t("peerTitle"));
+      setText("#tab-peer .hint", t("peerHint"));
+      setLabelText("#respondentNameInput", t("respondentNameLabel"), t("respondentRole"));
+      setLabelText("#targetNameInput", t("targetNameLabel"), t("targetRole"));
+      setAttr("#respondentNameInput", "placeholder", t("respondentPlaceholder"));
+      setAttr("#targetNameInput", "placeholder", t("targetPlaceholder"));
+      setAttr("#peerBoard", "aria-label", t("peerBoardLabel"));
+      setText("#tab-peer .selected-box h3", t("peerSelectedTitle"));
+      setText("#resetPeerBtn", t("resetPeer"));
+      setText("#makeResponseBtn", t("makeResponse"));
+      setText("#responseArea h3", t("responseDataTitle"));
+      setText("#responseArea .small", t("responseDataHint"));
+      setAttr("#responseData", "aria-label", t("responseDataLabel"));
+      setText("#copyResponseBtn", t("copyResponse"));
+
+      setText("#tab-result .section-title h2", t("resultTitle"));
+      setText("#tab-result > .hint", t("resultHint"));
+      const guideGrid = $(".guide-grid");
+      if (guideGrid) guideGrid.setAttribute("aria-label", t("guideLabel"));
+      const guides = [
+        ["openTitle", "openGuide"],
+        ["blindTitle", "blindGuide"],
+        ["hiddenTitle", "hiddenGuide"],
+        ["unknownTitle", "unknownGuide"]
+      ];
+      $$("#tab-result > .guide-grid .guide-item").forEach((item, idx) => {
+        const [titleKey, descKey] = guides[idx] || guides[0];
+        const h3 = item.querySelector("h3");
+        const p = item.querySelector("p");
+        if (h3) h3.textContent = t(titleKey);
+        if (p) p.textContent = t(descKey);
+      });
+
+      const importColumn = $("#importBox")?.closest("div");
+      if (importColumn) {
+        const h3 = importColumn.querySelector("h3");
+        if (h3) h3.textContent = t("importTitle");
+      }
+      setAttr("#importBox", "placeholder", t("importPlaceholder"));
+      setText("#importBtn", t("importBtn"));
+      setText("#clearRespondentsBtn", t("clearRespondents"));
+      const importedColumn = $("#resultStateMsg")?.closest("div");
+      if (importedColumn) {
+        const h3 = importedColumn.querySelector("h3");
+        if (h3) h3.textContent = t("importedResponsesTitle");
+      }
+
+      const footerNote = $("footer > p");
+      if (footerNote) footerNote.textContent = t("footerNote");
+      const references = $(".references");
+      if (references) references.setAttribute("aria-label", t("referencesLabel"));
+      const refStrong = $(".references strong");
+      if (refStrong) refStrong.textContent = t("referencesTitle");
+      const refItems = $$(".references li");
+      if (refItems[3]) refItems[3].textContent = t("referencesLast");
+    }
+
     function togglePick(listName, index) {
       const current = listName === "self" ? selfPicks : peerPicks;
       const next = current.includes(index)
@@ -1135,14 +1630,19 @@
       renderAll();
     }
 
-    function adjectiveLabel(idx) {
-      const item = ADJECTIVES[idx];
-      return `${item.ko}(${item.en})`;
-    }
-
     function adjectiveStackHTML(idx) {
       const item = ADJECTIVES[idx];
+      if (currentLang === "en") {
+        return `<span class="word-stack"><span class="eng english-only">${escapeHTML(item.en)}</span></span>`;
+      }
       return `<span class="word-stack"><span class="ko">${escapeHTML(item.ko)}</span><span class="eng">${escapeHTML(item.en)}</span></span>`;
+    }
+
+    function adjectiveCellHTML(item) {
+      if (currentLang === "en") {
+        return `<span class="eng english-only">${escapeHTML(item.en)}</span>`;
+      }
+      return `<span class="ko">${escapeHTML(item.ko)}</span><span class="eng">${escapeHTML(item.en)}</span>`;
     }
 
     function renderAdjectiveBoard(containerId, listName) {
@@ -1151,7 +1651,7 @@
         const checked = selected.includes(idx);
         return `
           <div class="adjective-cell ${checked ? "selected" : ""}" data-list="${listName}" data-index="${idx}" tabindex="0" role="button" aria-pressed="${checked}">
-            <span class="ko">${escapeHTML(item.ko)}</span><span class="eng">${escapeHTML(item.en)}</span>
+            ${adjectiveCellHTML(item)}
           </div>
         `;
       }).join("");
@@ -1170,17 +1670,17 @@
       });
     }
 
-    function renderPickBox(containerSelector, picks, emptyText) {
+    function renderPickBox(containerSelector, picks, emptyKey) {
       const html = picks.length
         ? picks.map(idx => `<span class="pill">${adjectiveStackHTML(idx)}</span>`).join("")
-        : `<span class="empty">${escapeHTML(emptyText)}</span>`;
+        : `<span class="empty">${escapeHTML(t(emptyKey))}</span>`;
       const box = $(containerSelector);
       if (box) box.innerHTML = html;
     }
 
     function renderSelectedBoxes() {
-      renderPickBox("#selfSelectedBox", selfPicks, "아직 선택한 형용사가 없습니다.");
-      renderPickBox("#peerSelectedBox", peerPicks, "아직 선택한 형용사가 없습니다.");
+      renderPickBox("#selfSelectedBox", selfPicks, "selfEmpty");
+      renderPickBox("#peerSelectedBox", peerPicks, "peerEmpty");
     }
 
     function makeResponseData() {
@@ -1211,19 +1711,19 @@
 
     function parseResponseData(raw) {
       const input = String(raw || "").trim();
-      if (!input) throw new Error("빈 데이터");
-      if (!input.startsWith(RESPONSE_PREFIX)) throw new Error("응답 데이터 형식이 아님");
+      if (!input) throw new Error(t("importEmptyData"));
+      if (!input.startsWith(RESPONSE_PREFIX)) throw new Error(t("importWrongFormat"));
       const encoded = input.slice(RESPONSE_PREFIX.length).trim();
       const json = decodeURIComponent(escape(atob(encoded)));
       const data = JSON.parse(json);
       const picks = normalizePicks(data.picks);
       if (data.type !== "johari-response" || picks.length !== MAX_PICKS) {
-        throw new Error("응답 데이터에 6개 선택값이 없음");
+        throw new Error(t("importMissingPicks"));
       }
       return {
         id: String(data.id || makeId()),
-        respondentName: String(data.respondentName || "이름 없음").trim() || "이름 없음",
-        targetName: String(data.targetName || "대상 미입력").trim() || "대상 미입력",
+        respondentName: String(data.respondentName || "").trim(),
+        targetName: String(data.targetName || "").trim(),
         picks,
         createdAt: data.createdAt || new Date().toISOString()
       };
@@ -1232,9 +1732,9 @@
     async function copyToClipboard(text) {
       try {
         await navigator.clipboard.writeText(text);
-        alert("복사되었습니다.");
+        alert(t("alertCopied"));
       } catch (e) {
-        prompt("아래 내용을 복사하세요.", text);
+        prompt(t("promptCopy"), text);
       }
     }
 
@@ -1246,13 +1746,13 @@
         try {
           const response = parseResponseData(candidate);
           if (responses.some(r => r.id === response.id)) {
-            failed.push("이미 가져온 응답");
+            failed.push(t("importDuplicate"));
             return;
           }
           responses.push(response);
           ok += 1;
         } catch (e) {
-          failed.push(e.message || "가져오기 실패");
+          failed.push(e.message || t("importFail"));
         }
       });
       saveResponses();
@@ -1271,10 +1771,10 @@
       const peerCounts = getPeerCounts();
       const selfSet = new Set(selfPicks);
       const windows = {
-        open: { title: "열린 창", desc: "본인도 선택했고 타인도 선택한 특성", items: [] },
-        blind: { title: "보이지 않는 창", desc: "본인은 선택하지 않았지만 타인이 선택한 특성", items: [] },
-        hidden: { title: "숨겨진 창", desc: "본인은 선택했지만 타인은 선택하지 않은 특성", items: [] },
-        unknown: { title: "미지의 창", desc: "본인과 타인 모두 선택하지 않은 특성", items: [] }
+        open: { items: [] },
+        blind: { items: [] },
+        hidden: { items: [] },
+        unknown: { items: [] }
       };
 
       ADJECTIVES.forEach((item, idx) => {
@@ -1295,9 +1795,17 @@
       return windows;
     }
 
+    function getWindowTitle(key) {
+      return t(`${key}Title`);
+    }
+
+    function getWindowDesc(key) {
+      return t(`${key}Desc`);
+    }
+
     function getTypeLabel(windows) {
       if (responses.length === 0) {
-        return { label: "타인 응답 대기", text: "아직 타인 응답이 없어 유형을 판정하기 어렵습니다.", top: null, entries: [] };
+        return { label: t("typeWaitingLabel"), text: t("typeWaitingText"), top: null, entries: [] };
       }
 
       const respondentCount = responses.length;
@@ -1311,22 +1819,22 @@
 
       const entries = Object.entries(windows).map(([key, w]) => ({
         key,
-        title: w.title,
+        title: getWindowTitle(key),
         adjectiveCount: w.adjectiveCount,
         selectionSum: w.selectionSum,
-        adjustedScore: w.adjectiveCount - expectedByKey[key]
+        ratioScore: (w.adjectiveCount + 0.5) / (expectedByKey[key] + 0.5)
       })).sort((a, b) =>
-        (b.adjustedScore - a.adjustedScore) ||
+        (b.ratioScore - a.ratioScore) ||
         (b.selectionSum - a.selectionSum) ||
         (b.adjectiveCount - a.adjectiveCount)
       );
 
       const top = entries[0];
       const descriptions = {
-        open: ["개방형", "열린 창이 응답자 수를 고려한 기준보다 두드러지는 유형입니다. 자기인식과 타인의 인식이 비교적 잘 맞고, 자신의 특성이 관계 속에서 자연스럽게 드러나는 편입니다."],
-        blind: ["자기주장형", "보이지 않는 창이 응답자 수를 고려한 기준보다 두드러지는 유형입니다. 타인이 알아보는 모습이 본인의 자기인식에는 상대적으로 덜 포함되어 있을 수 있습니다. 피드백을 살펴보면 새로운 자기이해가 넓어질 수 있습니다."],
-        hidden: ["신중형", "숨겨진 창이 응답자 수를 고려한 기준보다 두드러지는 유형입니다. 스스로 알고 있는 특성에 비해 타인에게 드러나는 정도는 낮은 편입니다. 안전한 관계에서 자기표현을 조금씩 늘리면 열린 창이 넓어질 수 있습니다."],
-        unknown: ["고립형", "미지의 창이 응답자 수를 고려한 기준보다 두드러지는 유형입니다. 이번 선택 안에서는 본인과 타인 모두에게 뚜렷하게 포착되지 않은 특성이 상대적으로 많습니다. 다양한 상황에서의 상호작용과 자기탐색이 도움이 될 수 있습니다."]
+        open: [t("typeOpen"), t("typeOpenText")],
+        blind: [t("typeBlind"), t("typeBlindText")],
+        hidden: [t("typeHidden"), t("typeHiddenText")],
+        unknown: [t("typeUnknown"), t("typeUnknownText")]
       };
       const [label, text] = descriptions[top.key];
       return { label, text, top, entries };
@@ -1335,17 +1843,17 @@
     function renderSelfResponseTop() {
       const box = $("#selfResponseTop");
       if (!box) return;
-      const selfName = getSelfName() || "이름 미입력";
+      const selfName = getSelfName() || t("selfNameMissing");
       const currentCount = selfPicks.length;
       const picksHTML = selfPicks.length
         ? selfPicks.map(idx => `<span class="pill">${adjectiveStackHTML(idx)}</span>`).join("")
-        : `<span class="empty">아직 선택한 형용사가 없습니다.</span>`;
+        : `<span class="empty">${escapeHTML(t("selfEmpty"))}</span>`;
       const statusHTML = currentCount === MAX_PICKS
-        ? `<p class="small">${escapeHTML(selfName)}이/가 본인을 잘 나타낸다고 선택한 형용사 6개입니다.</p>`
-        : `<p class="notice warn" style="margin:8px 0 12px;">본인 선택이 아직 완료되지 않았습니다. 현재 ${currentCount} / ${MAX_PICKS}개 선택했습니다.</p>`;
+        ? `<p class="small">${escapeHTML(t("selfResponseComplete", { name: selfName }))}</p>`
+        : `<p class="notice warn" style="margin:8px 0 12px;">${escapeHTML(t("selfResponseIncomplete", { count: currentCount, max: MAX_PICKS }))}</p>`;
 
       box.innerHTML = `
-        <h3>본인 응답</h3>
+        <h3>${escapeHTML(t("selfResponseTitle"))}</h3>
         ${statusHTML}
         <div class="pill-list">${picksHTML}</div>
       `;
@@ -1353,57 +1861,190 @@
 
     function renderResponseList() {
       if (!responses.length) {
-        $("#responseList").innerHTML = `<p class="empty">아직 가져온 타인 응답이 없습니다.</p>`;
+        $("#responseList").innerHTML = `<p class="empty">${escapeHTML(t("noResponses"))}</p>`;
         return;
       }
-      $("#responseList").innerHTML = responses.map((r, index) => `
-        <article class="response-card">
-          <div class="response-card-head">
-            <h3>${escapeHTML(r.respondentName)}의 응답</h3>
-            <button type="button" class="danger delete-response-btn" data-response-index="${index}" aria-label="${escapeHTML(r.respondentName)} 응답 삭제">선택 삭제</button>
-          </div>
-          <p class="small">${escapeHTML(r.respondentName)}이/가 ${escapeHTML(r.targetName)}을/를 잘 나타낸다고 선택한 형용사</p>
-          <div class="pill-list">
-            ${r.picks.map(idx => `<span class="pill">${adjectiveStackHTML(idx)}</span>`).join("")}
-          </div>
-        </article>
-      `).join("");
+      $("#responseList").innerHTML = responses.map((r, index) => {
+        const respondent = displayName(r.respondentName, "noName");
+        const target = displayName(r.targetName, "noTarget");
+        return `
+          <article class="response-card">
+            <div class="response-card-head">
+              <h3>${escapeHTML(t("responseCardTitle", { name: respondent }))}</h3>
+              <button type="button" class="danger delete-response-btn" data-response-index="${index}" aria-label="${escapeHTML(t("responseDeleteAria", { name: respondent }))}">${escapeHTML(t("responseDeleteButton"))}</button>
+            </div>
+            <p class="small">${escapeHTML(t("responseDescription", { respondent, target }))}</p>
+            <div class="pill-list">
+              ${r.picks.map(idx => `<span class="pill">${adjectiveStackHTML(idx)}</span>`).join("")}
+            </div>
+          </article>
+        `;
+      }).join("");
     }
 
     function deleteResponseAt(index) {
       if (!Number.isInteger(index) || index < 0 || index >= responses.length) return;
       const response = responses[index];
-      const name = response.respondentName || "이름 없음";
-      if (!confirm(`${name}의 응답을 삭제할까요?`)) return;
+      const name = displayName(response.respondentName, "noName");
+      if (!confirm(t("confirmDeleteResponse", { name }))) return;
       responses.splice(index, 1);
       saveResponses();
       renderResults();
     }
 
+    function renderQuadrantPill(item) {
+      const adjectiveHTML = currentLang === "en"
+        ? `<span class="eng english-only">${escapeHTML(item.en)}</span>`
+        : `<span class="ko">${escapeHTML(item.ko)}</span><span class="eng">${escapeHTML(item.en)}</span>`;
+      return `
+        <span class="pill" title="Self ${item.selfCount}, Peer ${item.peerCount}">
+          ${adjectiveHTML}
+          <span class="num">${item.totalCount}</span>
+        </span>
+      `;
+    }
+
     function renderQuadrantCard(key, data) {
       const pills = data.items.length
-        ? data.items.map(item => `
-          <span class="pill" title="본인 ${item.selfCount}, 타인 ${item.peerCount}">
-            <span class="ko">${escapeHTML(item.ko)}</span><span class="eng">${escapeHTML(item.en)}</span>
-            <span class="num">${item.totalCount}</span>
-          </span>
-        `).join("")
-        : `<span class="empty">해당 형용사가 없습니다.</span>`;
+        ? data.items.map(item => renderQuadrantPill(item)).join("")
+        : `<span class="empty">${escapeHTML(t("noneInQuadrant"))}</span>`;
       return `
         <article class="quadrant" data-window="${key}">
           <div class="quadrant-head">
-            <h3>${escapeHTML(data.title)}</h3>
-            <span class="count-badge">${data.adjectiveCount}개</span>
+            <h3>${escapeHTML(getWindowTitle(key))}</h3>
+            <span class="count-badge">${escapeHTML(t("adjectiveCount", { count: data.adjectiveCount }))}</span>
           </div>
           <div class="quadrant-body">
-            <p class="mini-desc">${escapeHTML(data.desc)}</p>
+            <p class="mini-desc">${escapeHTML(getWindowDesc(key))}</p>
             <div class="pill-list">${pills}</div>
             <div class="quad-foot">
-              <strong>형용사 수: ${data.adjectiveCount}개</strong>
-              <strong>선택 합산: ${data.selectionSum}회</strong>
+              <strong>${escapeHTML(t("quadrantAdjectiveCount", { count: data.adjectiveCount }))}</strong>
+              <strong>${escapeHTML(t("quadrantSelectionSum", { count: data.selectionSum }))}</strong>
             </div>
           </div>
         </article>
+      `;
+    }
+
+    function intersectPicks(a, b) {
+      const bSet = new Set(normalizePicks(b));
+      return normalizePicks(a).filter(idx => bSet.has(idx));
+    }
+
+    function adjectivePillsHTML(picks) {
+      return picks.length
+        ? picks.map(idx => `<span class="pill">${adjectiveStackHTML(idx)}</span>`).join("")
+        : `<span class="empty">${escapeHTML(t("overlapNone"))}</span>`;
+    }
+
+    function renderMatchList(matches) {
+      return matches.map(match => `
+        <div class="match-item">
+          <div class="match-title">
+            ${escapeHTML(match.title)}
+            <span class="match-count">${escapeHTML(t("overlapCount", { count: match.count }))}</span>
+          </div>
+          <div class="pill-list">${adjectivePillsHTML(match.overlap)}</div>
+        </div>
+      `).join("");
+    }
+
+    function makeParticipants() {
+      const selfName = getSelfName().trim() || t("selfNameMissing");
+      const self = { id: "self", kind: "self", name: selfName, picks: normalizePicks(selfPicks) };
+      const peers = responses.map((r, index) => ({
+        id: r.id || `peer-${index}`,
+        kind: "peer",
+        name: displayName(r.respondentName, "noName"),
+        picks: normalizePicks(r.picks),
+        index
+      }));
+      return { self, peers, all: [self, ...peers] };
+    }
+
+    function topSelfPeerMatches(self, peers) {
+      if (!peers.length) return [];
+      const scored = peers.map(peer => {
+        const overlap = intersectPicks(self.picks, peer.picks);
+        return {
+          title: t("overlapWithSelf", { name: peer.name }),
+          count: overlap.length,
+          overlap
+        };
+      });
+      const maxCount = Math.max(...scored.map(item => item.count));
+      return scored.filter(item => item.count === maxCount);
+    }
+
+    function pairwiseMatches(participants, mode) {
+      const pairs = [];
+      for (let i = 0; i < participants.length; i += 1) {
+        for (let j = i + 1; j < participants.length; j += 1) {
+          const a = participants[i];
+          const b = participants[j];
+          const overlap = intersectPicks(a.picks, b.picks);
+          pairs.push({
+            title: t("overlapPair", { a: a.name, b: b.name }),
+            count: overlap.length,
+            overlap
+          });
+        }
+      }
+      if (!pairs.length) return { matches: [], targetCount: null };
+      const counts = pairs.map(pair => pair.count);
+      const targetCount = mode === "min" ? Math.min(...counts) : Math.max(...counts);
+      return { matches: pairs.filter(pair => pair.count === targetCount), targetCount };
+    }
+
+    function renderOverlapSection(title, hint, bodyHTML) {
+      return `
+        <article class="overlap-section">
+          <h3>${escapeHTML(title)}</h3>
+          <p class="small">${escapeHTML(hint)}</p>
+          ${bodyHTML}
+        </article>
+      `;
+    }
+
+    function renderOverlapSummary() {
+      const box = $("#overlapSummary");
+      if (!box) return;
+      if (selfPicks.length !== MAX_PICKS) {
+        box.style.display = "none";
+        box.innerHTML = "";
+        return;
+      }
+
+      const { self, peers, all } = makeParticipants();
+      const selfPeerMatches = topSelfPeerMatches(self, peers);
+      const peerPeer = pairwiseMatches(peers, "max");
+      const least = pairwiseMatches(all, "min");
+
+      const selfPeerBody = peers.length
+        ? `<div class="match-list">${renderMatchList(selfPeerMatches)}</div>`
+        : `<p class="empty">${escapeHTML(t("overlapNeedResponses"))}</p>`;
+
+      const peerPeerBody = peers.length >= 2
+        ? `<div class="match-list">${renderMatchList(peerPeer.matches)}</div>`
+        : `<p class="empty">${escapeHTML(t("overlapNeedTwoPeers"))}</p>`;
+
+      let leastIntro = "";
+      if (least.matches.length) {
+        leastIntro = `<p class="small" style="margin-top:10px;">${escapeHTML(least.targetCount === 0 ? t("overlapCompleteDifferent") : t("overlapNoCompleteDifferent"))}</p>`;
+      }
+      const leastBody = peers.length
+        ? `${leastIntro}<div class="match-list">${renderMatchList(least.matches)}</div>`
+        : `<p class="empty">${escapeHTML(t("overlapNeedResponses"))}</p>`;
+
+      box.style.display = "block";
+      box.innerHTML = `
+        <h3>${escapeHTML(t("overlapSummaryTitle"))}</h3>
+        <p>${escapeHTML(t("overlapSummaryHint"))}</p>
+        <div class="overlap-grid">
+          ${renderOverlapSection(t("overlapSelfPeerTitle"), t("overlapSelfPeerHint"), selfPeerBody)}
+          ${renderOverlapSection(t("overlapPeerPeerTitle"), t("overlapPeerPeerHint"), peerPeerBody)}
+          ${renderOverlapSection(t("overlapLeastTitle"), t("overlapLeastHint"), leastBody)}
+        </div>
       `;
     }
 
@@ -1411,25 +2052,25 @@
       const summary = getTypeLabel(windows);
       const maxCount = Math.max(...Object.values(windows).map(w => w.adjectiveCount), 1);
       const typeByKey = {
-        open: "개방형",
-        blind: "자기주장형",
-        hidden: "신중형",
-        unknown: "고립형"
+        open: t("typeOpen"),
+        blind: t("typeBlind"),
+        hidden: t("typeHidden"),
+        unknown: t("typeUnknown")
       };
       const typeDescriptions = {
-        open: "나와 타인이 함께 인식하는 특성이 많은 유형입니다. 자기표현과 피드백 수용이 비교적 균형을 이루며, 관계에서 투명성과 친밀감이 높게 나타날 수 있습니다.",
-        blind: "타인은 알아보지만 나는 덜 인식하는 특성이 많은 유형입니다. 솔직하고 표현력이 있어 보일 수 있으나, 타인의 피드백을 통해 자기인식을 보완하는 과정이 중요합니다.",
-        hidden: "나는 알고 있지만 타인에게는 덜 드러난 특성이 많은 유형입니다. 신중하고 조심스러운 장점이 있지만, 필요한 만큼 자신을 드러내면 관계의 깊이가 커질 수 있습니다.",
-        unknown: "나와 타인 모두 아직 뚜렷하게 선택하지 않은 특성이 많은 유형입니다. 자기탐색과 다양한 상호작용을 통해 새롭게 발견될 가능성이 큰 영역입니다."
+        open: t("typeOpenDesc"),
+        blind: t("typeBlindDesc"),
+        hidden: t("typeHiddenDesc"),
+        unknown: t("typeUnknownDesc")
       };
       const rows = ["open", "blind", "hidden", "unknown"].map(key => {
         const w = windows[key];
-        const mark = summary.top && summary.top.key === key ? `<span class="type-badge">유형 기준</span>` : "";
+        const mark = summary.top && summary.top.key === key ? `<span class="type-badge">${escapeHTML(t("typeBasis"))}</span>` : "";
         return `
           <tr>
-            <td><strong>${escapeHTML(w.title)}</strong>${mark}<br><span class="small">${escapeHTML(typeByKey[key])}</span></td>
-            <td>${w.adjectiveCount}개</td>
-            <td>${w.selectionSum}회</td>
+            <td><strong>${escapeHTML(getWindowTitle(key))}</strong>${mark}<br><span class="small">${escapeHTML(typeByKey[key])}</span></td>
+            <td>${escapeHTML(t("adjectiveCount", { count: w.adjectiveCount }))}</td>
+            <td>${escapeHTML(currentLang === "en" ? String(w.selectionSum) : `${w.selectionSum}회`)}</td>
           </tr>
         `;
       }).join("");
@@ -1438,9 +2079,9 @@
         const pct = Math.round((w.adjectiveCount / maxCount) * 100);
         return `
           <div class="bar-line">
-            <strong>${escapeHTML(w.title)}</strong>
+            <strong>${escapeHTML(getWindowTitle(key))}</strong>
             <div class="bar-track" aria-hidden="true"><div class="bar-fill" style="width:${pct}%"></div></div>
-            <span>${w.adjectiveCount}개</span>
+            <span>${escapeHTML(t("adjectiveCount", { count: w.adjectiveCount }))}</span>
           </div>
         `;
       }).join("");
@@ -1450,22 +2091,26 @@
           <p>${escapeHTML(typeDescriptions[key])}</p>
         </article>
       `).join("");
-      const nameText = getSelfName() ? `${escapeHTML(getSelfName())}의 ` : "";
-      const resultTitle = summary.top ? `${nameText}유형: ${escapeHTML(summary.label)}` : `${nameText}유형: ${escapeHTML(summary.label)}`;
+
+      const name = getSelfName().trim();
+      const resultTitle = name
+        ? t("typeSummaryTitle", { name: currentLang === "ko" ? `${name}의 ` : `${name}’s`, label: summary.label })
+        : t("typeSummaryTitleNoName", { label: summary.label });
+
       $("#typeSummary").style.display = "block";
       $("#typeSummary").innerHTML = `
-        <h3>${resultTitle}</h3>
+        <h3>${escapeHTML(resultTitle)}</h3>
         <p>${escapeHTML(summary.text)}</p>
-        <table class="comparison-table" aria-label="창별 합산 개수 비교">
+        <table class="comparison-table" aria-label="${escapeHTML(t("comparisonTableLabel"))}">
           <thead>
-            <tr><th>창 / 연결 유형</th><th>창 크기<br><span class="small">형용사 수</span></th><th>선택 합산</th></tr>
+            <tr><th>${t("tableWindowType")}</th><th>${t("tableWindowSize")}</th><th>${t("tableSelectionSum")}</th></tr>
           </thead>
           <tbody>${rows}</tbody>
         </table>
         <div class="bars">${bars}</div>
-        <p class="small">유형 판정은 타인 응답 수에 따른 무작위 선택 가능성을 내부적으로 보정해 산출합니다. 표와 막대는 해석을 돕기 위한 실제 관측값입니다.</p>
+        <p class="small">${escapeHTML(t("typeSummaryNote"))}</p>
         <div class="summary-card" style="margin-top:16px; padding:14px;">
-          <h3>네 가지 유형 설명</h3>
+          <h3>${escapeHTML(t("typeExplanationTitle"))}</h3>
           <div class="guide-grid" style="margin-bottom:0;">${typeCards}</div>
         </div>
       `;
@@ -1473,36 +2118,42 @@
 
     function renderResults() {
       loadResponses();
-      $("#respondentBadge").textContent = `타인 응답 ${responses.length}명`;
+      $("#respondentBadge").textContent = t("respondentBadge", { count: responses.length });
       renderSelfResponseTop();
       renderResponseList();
 
       if (selfPicks.length !== MAX_PICKS) {
         $("#resultStateMsg").className = "notice warn";
-        $("#resultStateMsg").textContent = "본인 선택 6개가 먼저 필요합니다.";
+        $("#resultStateMsg").textContent = t("resultNeedSelf");
         $("#typeSummary").style.display = "none";
+        const overlapSummary = $("#overlapSummary");
+        if (overlapSummary) {
+          overlapSummary.style.display = "none";
+          overlapSummary.innerHTML = "";
+        }
         $("#quadrants").innerHTML = "";
         return;
       }
 
       if (responses.length === 0) {
         $("#resultStateMsg").className = "notice warn";
-        $("#resultStateMsg").textContent = "본인 선택은 완료되었습니다. 타인 응답 데이터를 가져오면 결과가 채워집니다.";
+        $("#resultStateMsg").textContent = t("resultNeedPeer");
       } else {
         $("#resultStateMsg").className = "notice ok";
-        $("#resultStateMsg").textContent = `본인 선택 6개와 타인 응답 ${responses.length}명을 기준으로 계산했습니다.`;
+        $("#resultStateMsg").textContent = t("resultDone", { count: responses.length });
       }
 
       const windows = computeQuadrants();
       renderTypeSummary(windows);
+      renderOverlapSummary();
       $("#quadrants").innerHTML = ["open", "blind", "hidden", "unknown"].map(key => renderQuadrantCard(key, windows[key])).join("");
     }
 
     function updatePeerPrompt() {
       const target = getTargetName();
       $("#peerPrompt").textContent = target
-        ? `${target}을/를 잘 나타낸다고 생각하는 형용사 6개를 선택하세요.`
-        : "타인 이름을 입력하면 선택 문구가 표시됩니다.";
+        ? t("peerPromptTarget", { target })
+        : t("peerPromptBlank");
     }
 
     function renderAll() {
@@ -1512,8 +2163,8 @@
       renderSelectedBoxes();
       updatePeerPrompt();
 
-      $("#selfCount").textContent = `${selfPicks.length} / ${MAX_PICKS} 선택`;
-      $("#peerCount").textContent = `${peerPicks.length} / ${MAX_PICKS} 선택`;
+      $("#selfCount").textContent = t("pickCount", { count: selfPicks.length, max: MAX_PICKS });
+      $("#peerCount").textContent = t("pickCount", { count: peerPicks.length, max: MAX_PICKS });
       $("#goPeerBtn").disabled = false;
       $("#makeResponseBtn").disabled = false;
       if (activeTab === "result") renderResults();
@@ -1521,6 +2172,7 @@
 
     function bindControls() {
       $$(".tab-btn").forEach(btn => btn.addEventListener("click", () => setActiveTab(btn.dataset.tab)));
+      $$(".lang-btn").forEach(btn => btn.addEventListener("click", () => setLanguage(btn.dataset.lang)));
 
       $("#selfNameInput").addEventListener("input", () => {
         saveSelf();
@@ -1532,7 +2184,7 @@
       $("#targetNameInput").addEventListener("input", renderAll);
 
       $("#resetSelfBtn").addEventListener("click", () => {
-        if (!confirm("본인 선택을 초기화할까요?")) return;
+        if (!confirm(t("confirmResetSelf"))) return;
         selfPicks = [];
         localStorage.removeItem(STORAGE_SELF);
         setActiveTab("self");
@@ -1541,7 +2193,7 @@
 
       $("#goPeerBtn").addEventListener("click", () => {
         if (selfPicks.length !== MAX_PICKS) {
-          alert(`본인을 나타내는 형용사를 정확히 ${MAX_PICKS}개 선택해 주세요. 현재 ${selfPicks.length}개 선택했습니다.`);
+          alert(t("alertSelfPick", { max: MAX_PICKS, count: selfPicks.length }));
           return;
         }
         setActiveTab("peer");
@@ -1558,11 +2210,11 @@
         const respondentName = getRespondentName();
         const targetName = getTargetName();
         if (!respondentName || !targetName) {
-          alert("본인 이름과 타인 이름을 모두 입력해 주세요.");
+          alert(t("alertNames"));
           return;
         }
         if (peerPicks.length !== MAX_PICKS) {
-          alert(`타인을 나타내는 형용사를 정확히 ${MAX_PICKS}개 선택해 주세요. 현재 ${peerPicks.length}개 선택했습니다.`);
+          alert(t("alertPeerPick", { max: MAX_PICKS, count: peerPicks.length }));
           return;
         }
         const data = makeResponseData();
@@ -1577,8 +2229,10 @@
         const result = importResponses($("#importBox").value);
         renderAll();
         setActiveTab("result");
-        const failText = result.failed.length ? ` 실패 ${result.failed.length}건: ${[...new Set(result.failed)].join(", ")}` : "";
-        $("#importMsg").textContent = `가져온 응답 ${result.ok}건.${failText}`;
+        const failText = result.failed.length
+          ? t("importFailedSuffix", { count: result.failed.length, messages: [...new Set(result.failed)].join(", ") })
+          : "";
+        $("#importMsg").textContent = `${t("importResult", { ok: result.ok })}${failText}`;
       });
 
       $("#responseList").addEventListener("click", (e) => {
@@ -1588,7 +2242,7 @@
       });
 
       $("#clearRespondentsBtn").addEventListener("click", () => {
-        if (!confirm("가져온 타인 응답을 모두 삭제할까요?")) return;
+        if (!confirm(t("confirmClearResponses"))) return;
         responses = [];
         saveResponses();
         renderResults();
@@ -1599,6 +2253,7 @@
       bindControls();
       loadSelf();
       loadResponses();
+      applyLanguage();
       renderAll();
     }
 
