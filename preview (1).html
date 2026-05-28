@@ -1,0 +1,2759 @@
+<!doctype html>
+<html lang="ko">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>조하리의 창(Johari's Window)</title>
+  <style>
+    :root {
+      --bg: #fff8ef;
+      --bg-soft: #fffdf8;
+      --card: #ffffff;
+      --text: #35281f;
+      --muted: #7d6b5d;
+      --line: #eadccf;
+      --primary: #b76845;
+      --primary-dark: #8b4a32;
+      --primary-soft: #fff0e6;
+      --accent: #6f8a62;
+      --accent-soft: #eef5e9;
+      --danger: #a85042;
+      --danger-soft: #fff0ee;
+      --shadow: 0 16px 40px rgba(86, 52, 28, 0.10);
+      --radius: 22px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background:
+        radial-gradient(circle at top left, rgba(255, 225, 196, 0.68), transparent 36rem),
+        linear-gradient(180deg, #fff8ef 0%, #fffdf8 100%);
+      color: var(--text);
+      line-height: 1.58;
+      overflow-x: hidden;
+    }
+
+    .wrap {
+      width: min(1120px, calc(100% - 32px));
+      margin: 0 auto;
+    }
+
+    header {
+      padding: 38px 0 24px;
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      font-size: clamp(28px, 4vw, 44px);
+      letter-spacing: -0.04em;
+      line-height: 1.15;
+    }
+
+    .subtitle {
+      margin: 0;
+      max-width: 780px;
+      color: var(--muted);
+      font-size: 16px;
+    }
+
+    .source-note {
+      margin: 10px 0 0;
+      max-width: 860px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .source-note a {
+      color: var(--primary-dark);
+      font-weight: 700;
+    }
+
+    main {
+      padding-bottom: 52px;
+    }
+
+    .tabs {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-bottom: 16px;
+      background: rgba(255, 255, 255, 0.62);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 8px;
+      box-shadow: 0 8px 22px rgba(86, 52, 28, 0.06);
+    }
+
+    .tab-btn {
+      border: 0;
+      border-radius: 14px;
+      background: transparent;
+      color: var(--muted);
+      padding: 13px 12px;
+      font-weight: 800;
+      cursor: pointer;
+      transition: background 0.14s ease, color 0.14s ease, transform 0.14s ease;
+    }
+
+    .tab-btn:hover {
+      background: #fff4e9;
+      color: var(--text);
+    }
+
+    .tab-btn.active {
+      background: var(--primary);
+      color: #fff;
+      box-shadow: 0 8px 18px rgba(183, 104, 69, 0.22);
+    }
+
+    .tab-panel {
+      display: none;
+    }
+
+    .tab-panel.active {
+      display: block;
+    }
+
+    .card {
+      background: rgba(255, 255, 255, 0.86);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 22px;
+      backdrop-filter: blur(8px);
+    }
+
+    .section-title {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 8px;
+    }
+
+    h2,
+    h3 {
+      margin: 0;
+      letter-spacing: -0.025em;
+      line-height: 1.25;
+    }
+
+    h2 {
+      font-size: clamp(22px, 2.6vw, 30px);
+    }
+
+    h3 {
+      font-size: 18px;
+    }
+
+    .hint {
+      margin: 8px 0 16px;
+      color: var(--muted);
+    }
+
+    .count-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 32px;
+      border-radius: 999px;
+      padding: 6px 12px;
+      background: var(--primary-soft);
+      color: var(--primary-dark);
+      font-weight: 900;
+      white-space: nowrap;
+    }
+
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin: 16px 0;
+    }
+
+    button {
+      border: 0;
+      border-radius: 14px;
+      padding: 11px 15px;
+      font: inherit;
+      font-weight: 800;
+      cursor: pointer;
+      background: var(--primary);
+      color: #fff;
+      transition: transform 0.12s ease, opacity 0.12s ease, background 0.12s ease;
+    }
+
+    button:hover {
+      transform: translateY(-1px);
+      background: var(--primary-dark);
+    }
+
+    button:disabled {
+      opacity: 0.42;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .secondary {
+      background: var(--accent);
+      color: #fff;
+    }
+
+    .secondary:hover {
+      background: #566f4b;
+    }
+
+    .plain {
+      background: #fff;
+      color: var(--text);
+      border: 1px solid var(--line);
+    }
+
+    .plain:hover {
+      background: #fff8f1;
+    }
+
+    .danger {
+      background: var(--danger-soft);
+      color: var(--danger);
+      border: 1px solid #f1c9c1;
+    }
+
+    .danger:hover {
+      background: #ffe5df;
+    }
+
+    .name-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+      margin: 16px 0;
+    }
+
+    label {
+      display: grid;
+      gap: 7px;
+      color: var(--muted);
+      font-weight: 760;
+    }
+
+    input[type="text"],
+    textarea {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 12px 13px;
+      font: inherit;
+      background: var(--bg-soft);
+      color: var(--text);
+      outline: none;
+    }
+
+    textarea {
+      min-height: 126px;
+      resize: vertical;
+    }
+
+    input[type="text"]:focus,
+    textarea:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 4px rgba(183, 104, 69, 0.14);
+      background: #fff;
+    }
+
+    .adjective-board {
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      background: rgba(255, 253, 248, 0.9);
+      padding: 12px;
+      margin-top: 12px;
+      overflow: visible;
+      width: 100%;
+    }
+
+    .adjective-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 9px;
+      width: 100%;
+    }
+
+    .adjective-cell {
+      width: 100%;
+      min-width: 0;
+      min-height: 62px;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: #fff;
+      padding: 10px 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      cursor: pointer;
+      user-select: none;
+      position: relative;
+      transition: background 0.12s ease, border-color 0.12s ease, transform 0.12s ease, box-shadow 0.12s ease;
+      font-weight: 780;
+      letter-spacing: -0.015em;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    .ko {
+      display: block;
+    }
+
+    .word-stack {
+      display: inline-flex;
+      flex-direction: column;
+      align-items: center;
+      line-height: 1.25;
+    }
+
+    .word-stack .eng {
+      display: block;
+      font-size: 12px;
+      margin-top: 2px;
+    }
+
+    .adjective-cell:hover {
+      background: #fff8f1;
+      border-color: #d9b69f;
+      transform: translateY(-1px);
+    }
+
+    .adjective-cell.selected {
+      background: var(--primary-soft);
+      border-color: var(--primary);
+      box-shadow: inset 0 0 0 1px var(--primary);
+    }
+
+    .adjective-cell.selected::after {
+      content: "✓";
+      position: absolute;
+      right: 8px;
+      top: 7px;
+      width: 24px;
+      height: 24px;
+      border-radius: 999px;
+      background: var(--primary);
+      color: #fff;
+      display: grid;
+      place-items: center;
+      font-size: 14px;
+      font-weight: 900;
+    }
+
+    .eng {
+      color: var(--muted);
+      font-weight: 680;
+    }
+
+    .selected-box {
+      border: 1px solid #e7c8b5;
+      background: linear-gradient(180deg, #fff8f2 0%, #ffffff 100%);
+      border-radius: 18px;
+      padding: 15px;
+      margin: 14px 0;
+    }
+
+    .selected-box h3 {
+      margin-bottom: 9px;
+    }
+
+    .pill-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      min-height: 34px;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 6px 10px;
+      background: #fff;
+      font-weight: 820;
+      font-size: 14px;
+    }
+
+    .pill .num {
+      display: inline-grid;
+      place-items: center;
+      min-width: 22px;
+      height: 22px;
+      border-radius: 999px;
+      background: var(--accent-soft);
+      color: #4f6a43;
+      font-size: 12px;
+      padding: 0 6px;
+    }
+
+
+    .generated-response-list {
+      display: grid;
+      gap: 12px;
+      margin: 4px 0 0;
+    }
+
+    .generated-response-card {
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: #fff;
+      padding: 14px;
+      cursor: pointer;
+      transition: background 0.12s ease, border-color 0.12s ease, transform 0.12s ease;
+    }
+
+    .generated-response-card:hover,
+    .generated-response-card:focus-visible {
+      background: #fff8f1;
+      border-color: #d9b69f;
+      transform: translateY(-1px);
+      outline: none;
+    }
+
+    .generated-response-card h3 {
+      margin: 0;
+    }
+
+    .generated-response-card .pill {
+      cursor: inherit;
+    }
+
+    .created-response-copy-row {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 10px;
+      align-items: stretch;
+      margin-top: 10px;
+    }
+
+    .created-response-data {
+      width: 100%;
+      min-height: 58px;
+      margin: 0;
+      font-size: 13px;
+      word-break: break-all;
+    }
+
+    .created-response-actions {
+      display: flex;
+      align-items: stretch;
+      margin: 0;
+    }
+
+    .created-response-actions button {
+      height: 100%;
+      min-width: 128px;
+      white-space: nowrap;
+    }
+
+    .delete-created-response-btn {
+      flex: 0 0 auto;
+      padding: 7px 10px;
+      border-radius: 999px;
+      font-size: 13px;
+    }
+
+    .response-status-message {
+      margin: 8px 0 0;
+    }
+
+    .empty {
+      color: var(--muted);
+      font-style: italic;
+    }
+
+    .notice {
+      border: 1px solid #e9cfb8;
+      background: #fff6ec;
+      color: #6f4a32;
+      padding: 13px 14px;
+      border-radius: 16px;
+      margin: 12px 0;
+    }
+
+    .notice.ok {
+      border-color: #cbdcbd;
+      background: #f3faef;
+      color: #435f38;
+    }
+
+    .notice.warn {
+      border-color: #efd7a5;
+      background: #fff9e8;
+      color: #7a5c1b;
+    }
+
+    .copy-panel {
+      display: grid;
+      gap: 10px;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 14px;
+      background: #fff;
+      margin-top: 14px;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      gap: 16px;
+    }
+
+    .result-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+      margin-top: 18px;
+    }
+
+    .quadrant {
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      background: #fff;
+      overflow: hidden;
+    }
+
+    .quadrant-head {
+      padding: 14px 16px;
+      background: #fff7ef;
+      border-bottom: 1px solid var(--line);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .quadrant-body {
+      padding: 14px 16px 16px;
+    }
+
+    .mini-desc {
+      margin: 0 0 12px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .quad-foot {
+      margin-top: 13px;
+      padding-top: 12px;
+      border-top: 1px dashed var(--line);
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      color: #5b4a3d;
+      font-size: 14px;
+    }
+
+    .summary-card,
+    .response-card {
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      background: #fff;
+      padding: 16px;
+      margin-top: 16px;
+    }
+
+    .response-card h3 {
+      margin-bottom: 6px;
+    }
+
+    .response-card-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 10px;
+      margin-bottom: 6px;
+    }
+
+    .response-card-head h3 {
+      margin: 0;
+    }
+
+    .delete-response-btn {
+      flex: 0 0 auto;
+      padding: 7px 10px;
+      border-radius: 999px;
+      font-size: 13px;
+    }
+
+    .response-card+.response-card {
+      margin-top: 10px;
+    }
+
+    .response-collapsible {
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      background: #fff;
+      padding: 0;
+      overflow: hidden;
+    }
+
+    .response-collapsible summary {
+      list-style: none;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 16px;
+      cursor: pointer;
+      user-select: none;
+      background: #fff7ef;
+    }
+
+    .response-collapsible summary::-webkit-details-marker {
+      display: none;
+    }
+
+    .response-collapsible summary::after {
+      content: "⌄";
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 999px;
+      padding: 6px 10px;
+      background: var(--primary-soft);
+      color: var(--primary-dark);
+      font-size: 13px;
+      font-weight: 900;
+      white-space: nowrap;
+    }
+
+    .response-collapsible[open] summary::after {
+      content: "⌃";
+    }
+
+    .response-collapsible h3 {
+      margin: 0;
+    }
+
+    .response-collapsible-body {
+      padding: 0 16px 16px;
+    }
+
+    .self-response-top {
+      margin: 16px 0 18px;
+      background: linear-gradient(180deg, #fffaf4 0%, #ffffff 100%);
+    }
+
+    .bars {
+      display: grid;
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .bar-line {
+      display: grid;
+      grid-template-columns: 108px 1fr 62px;
+      gap: 10px;
+      align-items: center;
+      font-size: 14px;
+    }
+
+    .bar-track {
+      height: 13px;
+      border-radius: 999px;
+      background: #f2eadf;
+      overflow: hidden;
+    }
+
+    .bar-fill {
+      height: 100%;
+      background: var(--primary);
+      border-radius: 999px;
+      width: 0%;
+    }
+
+    .small {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .overlap-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+      margin-top: 14px;
+    }
+
+    .overlap-section {
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: #fff;
+      padding: 14px;
+      min-width: 0;
+    }
+
+    .overlap-section h3 {
+      font-size: 16px;
+      margin-bottom: 7px;
+    }
+
+    .match-list {
+      display: grid;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .match-item {
+      border-top: 1px dashed var(--line);
+      padding-top: 10px;
+    }
+
+    .match-item:first-child {
+      border-top: 0;
+      padding-top: 0;
+    }
+
+    .match-title {
+      font-weight: 900;
+      margin-bottom: 6px;
+    }
+
+    .match-count {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 999px;
+      padding: 4px 9px;
+      background: var(--accent-soft);
+      color: #445f39;
+      font-size: 12px;
+      font-weight: 900;
+      margin-left: 6px;
+      white-space: nowrap;
+    }
+
+
+    .guide-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+      margin: 16px 0 18px;
+    }
+
+    .guide-item {
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: #fffdf9;
+      padding: 14px;
+    }
+
+    .guide-item h3 {
+      font-size: 16px;
+      margin-bottom: 6px;
+    }
+
+    .guide-item p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .bottom-summary {
+      margin-top: 18px;
+      background: linear-gradient(180deg, #fffaf4 0%, #ffffff 100%);
+    }
+
+    .export-toolbar {
+      justify-content: flex-end;
+      margin: 18px 0 0;
+    }
+
+    .export-sheet {
+      position: fixed;
+      left: -99999px;
+      top: 0;
+      width: 1080px;
+      max-width: none;
+      background: #fff8ef;
+      color: var(--text);
+      box-shadow: none;
+      z-index: -1;
+    }
+
+    .export-sheet .export-header {
+      margin-bottom: 18px;
+      text-align: left;
+    }
+
+    .export-sheet .export-title {
+      margin: 0 0 8px;
+      font-size: 34px;
+      letter-spacing: -0.04em;
+      line-height: 1.15;
+    }
+
+    .export-sheet .export-subtitle {
+      margin: 0 0 4px;
+      font-size: 20px;
+      letter-spacing: -0.025em;
+      line-height: 1.25;
+    }
+
+    .export-sheet .summary-card,
+    .export-sheet .response-card,
+    .export-sheet .quadrant {
+      box-shadow: none;
+    }
+
+    .export-sheet .result-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .export-sheet .guide-grid {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+
+    .export-sheet .overlap-grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .export-sheet button,
+    .export-sheet textarea,
+    .export-sheet [data-export-ignore] {
+      display: none !important;
+    }
+
+    .comparison-table {
+      width: 100%;
+      border-collapse: collapse;
+      overflow: hidden;
+      border-radius: 16px;
+      margin-top: 12px;
+      font-size: 14px;
+    }
+
+    .comparison-table th,
+    .comparison-table td {
+      border-bottom: 1px solid var(--line);
+      padding: 10px;
+      text-align: left;
+      vertical-align: top;
+    }
+
+    .comparison-table th {
+      color: var(--muted);
+      background: #fff7ef;
+      font-weight: 900;
+    }
+
+    .comparison-table tr:last-child td {
+      border-bottom: 0;
+    }
+
+    .type-badge {
+      display: inline-flex;
+      border-radius: 999px;
+      padding: 6px 10px;
+      background: var(--accent-soft);
+      color: #445f39;
+      font-weight: 900;
+      margin-left: 6px;
+      white-space: nowrap;
+    }
+
+    .references {
+      margin-top: 10px;
+      padding-top: 10px;
+      border-top: 1px dashed var(--line);
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
+    .references strong {
+      color: #5b4a3d;
+    }
+
+    .references ul {
+      margin: 6px 0 0;
+      padding-left: 18px;
+    }
+
+    .references li {
+      margin: 3px 0;
+    }
+
+    .references a {
+      color: inherit;
+      text-decoration-color: rgba(125, 107, 93, 0.45);
+    }
+
+    footer {
+      color: var(--muted);
+      font-size: 13px;
+      margin-top: 18px;
+    }
+
+    @media (max-width: 900px) {
+
+      .tabs,
+      .name-grid,
+      .grid-2,
+      .result-grid,
+      .guide-grid,
+      .overlap-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .card {
+        padding: 17px;
+      }
+
+      .bar-line {
+        grid-template-columns: 92px 1fr 52px;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .wrap {
+        width: calc(100% - 18px);
+        max-width: 1120px;
+      }
+
+      header {
+        padding: 24px 0 16px;
+      }
+
+      .subtitle {
+        font-size: 14px;
+      }
+
+      .tabs {
+        position: sticky;
+        top: 8px;
+        z-index: 10;
+        gap: 6px;
+        border-radius: 16px;
+        padding: 6px;
+      }
+
+      .tab-btn {
+        padding: 10px 8px;
+        font-size: 13px;
+        border-radius: 12px;
+      }
+
+      .card {
+        border-radius: 18px;
+        padding: 14px;
+      }
+
+      .adjective-board {
+        padding: 8px;
+        border-radius: 16px;
+        margin-top: 10px;
+        width: 100%;
+        overflow: visible;
+      }
+
+      .adjective-grid {
+        display: grid !important;
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: 7px;
+        width: 100%;
+      }
+
+      .adjective-cell {
+        display: flex !important;
+        min-width: 0;
+        min-height: 72px;
+        padding: 9px 8px;
+        border-radius: 14px;
+        font-size: 14px;
+        word-break: keep-all;
+      }
+
+      .adjective-cell .ko {
+        font-size: 14px;
+        line-height: 1.22;
+      }
+
+      .adjective-cell .eng {
+        font-size: 12px;
+        line-height: 1.18;
+      }
+
+      .adjective-cell.selected::after {
+        width: 22px;
+        height: 22px;
+        right: 6px;
+        top: 6px;
+        font-size: 13px;
+      }
+
+      .toolbar {
+        display: grid;
+        grid-template-columns: 1fr;
+      }
+
+      button {
+        width: 100%;
+        padding: 12px 13px;
+      }
+
+      .response-card-head {
+        align-items: stretch;
+      }
+
+      .created-response-copy-row {
+        grid-template-columns: 1fr;
+      }
+
+      .created-response-actions button {
+        min-width: 0;
+      }
+
+      .delete-response-btn {
+        width: 34px;
+        height: 34px;
+        min-width: 34px;
+        padding: 0;
+        border-radius: 999px;
+        font-size: 0;
+        line-height: 1;
+        align-self: flex-start;
+      }
+    
+      .delete-response-btn::before {
+        content: "×";
+        font-size: 20px;
+        font-weight: 900;
+        line-height: 1;
+      }
+      
+      .pill {
+        border-radius: 14px;
+        align-items: center;
+      }
+
+      .pill-list {
+        gap: 7px;
+      }
+
+      .quadrant-head {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .comparison-table {
+        font-size: 13px;
+      }
+
+      .comparison-table th,
+      .comparison-table td {
+        padding: 8px;
+      }
+
+      .references {
+        font-size: 11px;
+      }
+    }
+
+    @media (max-width: 360px) {
+      .adjective-grid {
+        grid-template-columns: 1fr !important;
+      }
+    }
+
+    .language-switch {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+
+    .language-switch .lang-btn {
+      width: auto;
+      padding: 9px 13px;
+      border-radius: 999px;
+      font-size: 14px;
+    }
+
+    .language-switch .lang-btn.active {
+      background: var(--primary);
+      color: #fff;
+      border-color: var(--primary);
+      box-shadow: 0 6px 14px rgba(183, 104, 69, 0.18);
+    }
+
+    .english-only {
+      color: var(--text);
+      font-weight: 820;
+      font-size: 15px;
+    }
+
+  </style>
+</head>
+
+<body>
+  <header class="wrap">
+    <div class="language-switch" aria-label="언어 선택 / Language selection">
+      <button id="langKoBtn" class="plain lang-btn active" data-lang="ko" type="button">한국어</button>
+      <button id="langEnBtn" class="plain lang-btn" data-lang="en" type="button">English</button>
+    </div>
+    <h1>조하리의 창(Johari's Window)</h1>
+    <p class="subtitle">본인이 고른 6개 형용사와 타인이 고른 6개 형용사를 비교해 열린 창, 보이지 않는 창, 숨겨진 창, 미지의 창을 자동으로 정리합니다.</p>
+    <p class="source-note">이 도구는 Joseph Luft와 Harrington Ingham이 1955년에 제안한 Johari Window 모델을 바탕으로 합니다. Johari는 두 연구자의 이름을 결합한 명칭이며, 네 영역은 자기와 타인이 알고 있거나 모르는 특성을 비교합니다. <a href="https://en.wikipedia.org/wiki/Johari_window" target="_blank" rel="noopener noreferrer">Wikipedia 요약 보기</a></p>
+  </header>
+
+  <main class="wrap">
+    <div class="tabs" role="tablist" aria-label="조하리의 창 단계">
+      <button class="tab-btn active" data-tab="self" type="button">1. 본인 선택</button>
+      <button class="tab-btn" data-tab="peer" type="button">2. 타인 선택</button>
+      <button class="tab-btn" data-tab="result" type="button">3. 결과 보기</button>
+    </div>
+
+    <section id="tab-self" class="tab-panel active card" role="tabpanel">
+      <div class="section-title">
+        <h2>본인 선택</h2>
+        <span id="selfCount" class="count-badge">0 / 6 선택</span>
+      </div>
+      <p class="hint">아래 56개 형용사 중 본인을 잘 나타내는 형용사 6개를 클릭하세요. 다시 클릭하면 선택이 해제됩니다. 선택 개수는 이동 버튼을 누를 때 확인합니다.</p>
+
+      <div class="name-grid">
+        <label>내 이름
+          <input id="selfNameInput" type="text" placeholder="예: 김민지" />
+        </label>
+      </div>
+
+      <div id="selfBoard" class="adjective-board" aria-label="본인 선택 형용사 목록"></div>
+
+      <div class="selected-box" aria-live="polite">
+        <h3>내가 선택한 형용사</h3>
+        <div id="selfSelectedBox" class="pill-list"><span class="empty">아직 선택한 형용사가 없습니다.</span></div>
+      </div>
+
+      <div class="toolbar">
+        <button id="resetSelfBtn" type="button" class="danger">본인 선택 초기화</button>
+        <button id="goPeerBtn" type="button" class="secondary">타인 선택으로 이동</button>
+      </div>
+    </section>
+
+    <section id="tab-peer" class="tab-panel card" role="tabpanel">
+      <div class="section-title">
+        <h2>타인 선택</h2>
+        <span id="peerCount" class="count-badge">0 / 6 선택</span>
+      </div>
+      <p class="hint">응답자는 자신의 이름과 평가 대상의 이름을 입력한 뒤, 그 사람을 잘 나타낸다고 생각하는 형용사 6개를 선택하세요. 선택 개수는 응답 데이터 만들기 버튼을 누를 때 확인합니다.</p>
+
+      <div class="name-grid">
+        <label>본인 이름 <span class="small">응답자</span>
+          <input id="respondentNameInput" type="text" placeholder="예: 이서준" />
+        </label>
+        <label>타인 이름 <span class="small">평가 대상</span>
+          <input id="targetNameInput" type="text" placeholder="예: 김민지" />
+        </label>
+      </div>
+
+      <p id="peerPrompt" class="notice">타인 이름을 입력하면 선택 문구가 표시됩니다.</p>
+
+      <div id="peerBoard" class="adjective-board" aria-label="타인 선택 형용사 목록"></div>
+
+      <div class="selected-box" aria-live="polite">
+        <h3>선택한 형용사</h3>
+        <div id="peerSelectedBox" class="pill-list"><span class="empty">아직 선택한 형용사가 없습니다.</span></div>
+      </div>
+
+      <div class="toolbar">
+        <button id="makeResponseBtn" type="button">응답 데이터 만들기 및 복사</button>
+      </div>
+
+      <div id="responseArea" class="copy-panel" style="display:none;">
+        <h3>내 응답 모아보기</h3>
+        <div id="createdResponseSummary" class="generated-response-list" aria-live="polite"></div>
+      </div>
+    </section>
+
+    <section id="tab-result" class="tab-panel card" role="tabpanel">
+      <div class="section-title">
+        <h2>결과 보기</h2>
+        <span id="respondentBadge" class="count-badge">타인 응답 0명</span>
+      </div>
+      <p class="hint">타인이 보내준 응답 데이터를 붙여 넣으면, 각 사람이 누구에 대해 어떤 형용사를 골랐는지 모아보고 결과를 계산할 수 있습니다.</p>
+
+      <div id="selfResponseTop" class="response-card self-response-top" aria-live="polite"></div>
+
+      <div class="grid-2">
+        <div>
+          <h3>응답 데이터 붙여넣기</h3>
+          <textarea id="importBox" placeholder="여기에 타인이 복사해 보낸 응답 데이터를 붙여 넣으세요. 여러 개를 한꺼번에 붙여 넣어도 됩니다."></textarea>
+          <div class="toolbar">
+            <button id="importBtn" type="button">응답 가져오기</button>
+            <button id="clearRespondentsBtn" type="button" class="danger">타인 응답 전체 삭제</button>
+          </div>
+          <div id="importMsg" class="small"></div>
+        </div>
+        <div>
+          <details id="importedResponsesDetails" class="response-collapsible">
+            <summary>
+              <h3 id="importedResponsesTitle">가져온 응답 (0개)</h3>
+            </summary>
+            <div class="response-collapsible-body">
+              <div id="responseList"></div>
+            </div>
+          </details>
+        </div>
+      </div>
+
+      <div id="quadrants" class="result-grid"></div>
+      <div id="typeSummary" class="summary-card bottom-summary" style="display:none;"></div>
+      <div id="overlapSummary" class="summary-card bottom-summary" style="display:none;"></div>
+
+      <div class="toolbar export-toolbar" data-export-ignore>
+        <button id="exportImageBtn" type="button" class="secondary">이미지로 저장</button>
+      </div>
+    </section>
+
+    <footer>
+      <p>이 파일은 서버 없이 작동하는 정적 HTML입니다. 응답 데이터에는 입력한 이름과 선택 정보가 포함되므로, 민감한 개인정보 입력은 피하는 것이 좋습니다.</p>
+      <div class="references" aria-label="참고문헌 및 출처">
+        <strong>참고문헌 및 출처</strong>
+        <ul>
+          <li>Luft, J., &amp; Ingham, H. (1955). <em>The Johari Window: A Graphic Model of Interpersonal Awareness</em>.
+            Proceedings of the Western Training Laboratory in Group Development, UCLA.</li>
+          <li>Luft, J. (1961). <em>The Johari Window: A Graphic Model of Awareness in Interpersonal Relations</em>.
+            Human Relations Training News.</li>
+          <li>Newstrom, J. W., &amp; Rubenfeld, S. A. (1983). <em>The Johari Window: A Reconceptualization</em>.
+            Developments in Business Simulation and Experiential Learning.</li>
+          <li>형용사 56개 목록과 네 영역 분류 방식은 공개 조하리의 창 활동지 및 설명 자료를 참고했습니다. 예: Parity Planner Johari Window worksheet,
+            PsychSafety “The Johari Window”.</li>
+        </ul>
+      </div>
+    </footer>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+
+  <script>
+    const ADJECTIVES = [
+      { en: "able", ko: "유능한" },
+      { en: "accepting", ko: "수용적인" },
+      { en: "adaptable", ko: "융통성 있는" },
+      { en: "bold", ko: "과감한" },
+      { en: "brave", ko: "용감한" },
+      { en: "calm", ko: "차분한" },
+      { en: "caring", ko: "배려심 있는" },
+      { en: "cheerful", ko: "명랑한" },
+      { en: "clever", ko: "영리한" },
+      { en: "complex", ko: "복합적인" },
+      { en: "confident", ko: "자신감 있는" },
+      { en: "dependable", ko: "의지할 만한" },
+      { en: "dignified", ko: "품위 있는" },
+      { en: "empathetic", ko: "공감적인" },
+      { en: "energetic", ko: "에너지 넘치는" },
+      { en: "extroverted", ko: "외향적인" },
+      { en: "friendly", ko: "친근한" },
+      { en: "giving", ko: "잘 베푸는" },
+      { en: "happy", ko: "행복한" },
+      { en: "helpful", ko: "도움이 되는" },
+      { en: "idealistic", ko: "이상주의적인" },
+      { en: "independent", ko: "독립적인" },
+      { en: "ingenious", ko: "독창적인" },
+      { en: "intelligent", ko: "지적인" },
+      { en: "introverted", ko: "내향적인" },
+      { en: "kind", ko: "친절한" },
+      { en: "knowledgeable", ko: "지식이 풍부한" },
+      { en: "logical", ko: "논리적인" },
+      { en: "loving", ko: "애정 어린" },
+      { en: "mature", ko: "성숙한" },
+      { en: "modest", ko: "겸손한" },
+      { en: "nervous", ko: "잘 긴장하는" },
+      { en: "observant", ko: "관찰력이 있는" },
+      { en: "organized", ko: "체계적인" },
+      { en: "patient", ko: "인내심 있는" },
+      { en: "powerful", ko: "영향력 있는" },
+      { en: "proud", ko: "자부심 있는" },
+      { en: "quiet", ko: "조용한" },
+      { en: "reflective", ko: "성찰적인" },
+      { en: "relaxed", ko: "여유로운" },
+      { en: "religious", ko: "신앙심 있는" },
+      { en: "responsive", ko: "반응이 빠른" },
+      { en: "searching", ko: "탐구적인" },
+      { en: "self-assertive", ko: "자기주장이 있는" },
+      { en: "self-conscious", ko: "자의식이 강한" },
+      { en: "sensible", ko: "분별력 있는" },
+      { en: "sentimental", ko: "감성적인" },
+      { en: "shy", ko: "수줍음이 많은" },
+      { en: "silly", ko: "엉뚱한" },
+      { en: "spontaneous", ko: "즉흥적인" },
+      { en: "sympathetic", ko: "동정심 있는" },
+      { en: "tense", ko: "경직된" },
+      { en: "trustworthy", ko: "신뢰할 수 있는" },
+      { en: "warm", ko: "따뜻한" },
+      { en: "wise", ko: "지혜로운" },
+      { en: "witty", ko: "재치 있는" }
+    ];
+
+    const I18N = {
+      ko: {
+        pageTitle: "조하리의 창(Johari's Window)",
+        subtitle: "본인이 고른 6개 형용사와 타인이 고른 6개 형용사를 비교해 열린 창, 보이지 않는 창, 숨겨진 창, 미지의 창을 자동으로 정리합니다.",
+        sourceNote: "이 도구는 Joseph Luft와 Harrington Ingham이 1955년에 제안한 Johari Window 모델을 바탕으로 합니다. Johari는 두 연구자의 이름을 결합한 명칭이며, 네 영역은 자기와 타인이 알고 있거나 모르는 특성을 비교합니다.",
+        sourceLinkLabel: "Wikipedia 요약 보기",
+        tabSelf: "1. 본인 선택",
+        tabPeer: "2. 타인 선택",
+        tabResult: "3. 결과 보기",
+        tabListLabel: "조하리의 창 단계",
+        selfTitle: "본인 선택",
+        selfHint: "아래 56개 형용사 중 본인을 잘 나타내는 형용사 6개를 클릭하세요. 다시 클릭하면 선택이 해제됩니다. 선택 개수는 이동 버튼을 누를 때 확인합니다.",
+        selfNameLabel: "내 이름",
+        selfNamePlaceholder: "예: 김민지",
+        selfBoardLabel: "본인 선택 형용사 목록",
+        selfSelectedTitle: "내가 선택한 형용사",
+        selfEmpty: "아직 선택한 형용사가 없습니다.",
+        resetSelf: "본인 선택 초기화",
+        goPeer: "타인 선택으로 이동",
+        peerTitle: "타인 선택",
+        peerHint: "응답자는 자신의 이름과 평가 대상의 이름을 입력한 뒤, 그 사람을 잘 나타낸다고 생각하는 형용사 6개를 선택하세요. 선택 개수는 응답 데이터 만들기 버튼을 누를 때 확인합니다.",
+        respondentNameLabel: "본인 이름",
+        respondentRole: "응답자",
+        targetNameLabel: "타인 이름",
+        targetRole: "평가 대상",
+        respondentPlaceholder: "예: 이서준",
+        targetPlaceholder: "예: 김민지",
+        peerPromptBlank: "타인 이름을 입력하면 선택 문구가 표시됩니다.",
+        peerPromptTarget: "{target}을/를 잘 나타낸다고 생각하는 형용사 6개를 선택하세요.",
+        peerBoardLabel: "타인 선택 형용사 목록",
+        peerSelectedTitle: "선택한 형용사",
+        peerEmpty: "아직 선택한 형용사가 없습니다.",
+        resetPeer: "타인 선택 초기화",
+        makeResponse: "응답 데이터 만들기 및 복사",
+        responseDataTitle: "복사해서 전달할 응답 데이터",
+        responseDataHint: "아래 내용을 복사해 결과를 확인할 사람에게 보내세요. 이름과 선택한 형용사 6개가 함께 들어 있습니다.",
+        responseDataLabel: "응답 데이터",
+        copyResponse: "응답 데이터 복사",
+        createdResponseSummaryTitle: "내 응답 모아보기",
+        createdResponsesHint: "",
+        createdResponseSummaryComplete: "",
+        createdResponseSummaryHint: "",
+        createdResponseBoxTitle: "{respondent} → {target}",
+        createdResponseEmpty: "아직 만든 응답이 없습니다.",
+        deleteCreatedResponse: "선택 삭제",
+        deleteCreatedResponseAria: "{respondent}의 응답 박스 삭제",
+        confirmDeleteCreatedResponse: "{respondent}의 응답 박스를 삭제할까요?",
+        createdResponseLoadAria: "{respondent}의 응답 수정하기",
+        responseReadyStatus: "응답 데이터가 내 응답 모아보기에 저장되었습니다.",
+        responseNeedsRemake: "입력이나 선택이 수정되었습니다. 형용사를 6개로 맞춘 뒤 응답 데이터 만들기를 다시 눌러주세요.",
+        responseLoadedForEdit: "선택한 응답을 위쪽 입력 영역에 다시 불러왔습니다. 수정 후 응답 데이터 만들기를 다시 누르세요.",
+        resultTitle: "결과 보기",
+        resultHint: "타인이 보내준 응답 데이터를 붙여 넣으면, 각 사람이 누구에 대해 어떤 형용사를 골랐는지 모아보고 결과를 계산할 수 있습니다.",
+        respondentBadge: "타인 응답 {count}명",
+        guideLabel: "조하리의 창 네 영역 설명",
+        openTitle: "열린 창",
+        openGuide: "나도 알고 타인도 아는 특성입니다. 자기인식과 타인의 인식이 만나는 영역입니다.",
+        blindTitle: "보이지 않는 창",
+        blindGuide: "나는 선택하지 않았지만 타인은 알아본 특성입니다. 피드백을 통해 발견할 수 있습니다.",
+        hiddenTitle: "숨겨진 창",
+        hiddenGuide: "나는 알고 있지만 타인에게는 덜 드러난 특성입니다. 자기노출과 관련됩니다.",
+        unknownTitle: "미지의 창",
+        unknownGuide: "나도 타인도 선택하지 않은 특성입니다. 아직 탐색되지 않았거나 해당성이 낮은 영역입니다.",
+        importTitle: "응답 데이터 붙여넣기",
+        importPlaceholder: "여기에 타인이 복사해 보낸 응답 데이터를 붙여 넣으세요. 여러 개를 한꺼번에 붙여 넣어도 됩니다.",
+        importBtn: "응답 가져오기",
+        clearRespondents: "타인 응답 전체 삭제",
+        exportImage: "이미지로 저장",
+        exportImageBusy: "이미지 생성 중...",
+        exportLibraryMissing: "이미지 저장 라이브러리를 불러오지 못했습니다. 인터넷 연결을 확인하거나 html2canvas 파일을 로컬로 포함하세요.",
+        exportImageError: "이미지 저장 중 오류가 발생했습니다.",
+        importedResponsesTitle: "가져온 응답",
+        importedResponsesTitleWithCount: "가져온 응답 ({count}개)",
+        resultPrepareMsg: "본인 선택과 타인 응답을 준비하세요.",
+        selfResponseTitle: "본인 응답",
+        selfResponseComplete: "{name}이/가 본인을 잘 나타낸다고 선택한 형용사 6개입니다.",
+        selfResponseIncomplete: "본인 선택이 아직 완료되지 않았습니다. 현재 {count} / {max}개 선택했습니다.",
+        noResponses: "아직 가져온 타인 응답이 없습니다.",
+        responseCardTitle: "{name}의 응답",
+        responseDeleteButton: "선택 삭제",
+        responseDeleteAria: "{name} 응답 삭제",
+        responseDescription: "{respondent}이/가 {target}을/를 잘 나타낸다고 선택한 형용사",
+        openDesc: "나도 알고 타인도 아는 특성입니다. 자기인식과 타인의 인식이 만나는 영역입니다.",
+        blindDesc: "나는 선택하지 않았지만 타인은 알아본 특성입니다. 피드백을 통해 발견할 수 있습니다.",
+        hiddenDesc: "나는 알고 있지만 타인에게는 덜 드러난 특성입니다. 자기노출과 관련됩니다.",
+        unknownDesc: "나도 타인도 선택하지 않은 특성입니다. 아직 탐색되지 않았거나 해당성이 낮은 영역입니다.",
+        noneInQuadrant: "해당 형용사가 없습니다.",
+        adjectiveCount: "{count}개",
+        quadrantAdjectiveCount: "형용사 수: {count}개",
+        quadrantSelectionSum: "선택 합산: {count}회",
+        resultNeedSelf: "본인 선택 6개가 먼저 필요합니다.",
+        resultNeedPeer: "본인 선택은 완료되었습니다. 타인 응답 데이터를 가져오면 결과가 채워집니다.",
+        resultDone: "본인 선택 6개와 타인 응답 {count}명을 기준으로 계산했습니다.",
+        typeWaitingLabel: "타인 응답 대기",
+        typeWaitingText: "아직 타인 응답이 없어 유형을 판정하기 어렵습니다.",
+        typeOpen: "개방형",
+        typeBlind: "자기주장형",
+        typeHidden: "신중형",
+        typeUnknown: "고립형",
+        typeOpenText: "열린 창이 응답자 수를 고려한 기준보다 두드러지는 유형입니다. 자기인식과 타인의 인식이 비교적 잘 맞고, 자신의 특성이 관계 속에서 자연스럽게 드러나는 편입니다.",
+        typeBlindText: "보이지 않는 창이 응답자 수를 고려한 기준보다 두드러지는 유형입니다. 타인이 알아보는 모습이 본인의 자기인식에는 상대적으로 덜 포함되어 있을 수 있습니다. 피드백을 살펴보면 새로운 자기이해가 넓어질 수 있습니다.",
+        typeHiddenText: "숨겨진 창이 응답자 수를 고려한 기준보다 두드러지는 유형입니다. 스스로 알고 있는 특성에 비해 타인에게 드러나는 정도는 낮은 편입니다. 안전한 관계에서 자기표현을 조금씩 늘리면 열린 창이 넓어질 수 있습니다.",
+        typeUnknownText: "미지의 창이 응답자 수를 고려한 기준보다 두드러지는 유형입니다. 이번 선택 안에서는 본인과 타인 모두에게 뚜렷하게 포착되지 않은 특성이 상대적으로 많습니다. 다양한 상황에서의 상호작용과 자기탐색이 도움이 될 수 있습니다.",
+        typeSummaryTitle: "{name}유형: {label}",
+        typeSummaryTitleNoName: "유형: {label}",
+        typeBasis: "유형 기준",
+        comparisonTableLabel: "창별 합산 개수 비교",
+        tableWindowType: "창 / 연결 유형",
+        tableWindowSize: "창 크기<br><span class=\"small\">형용사 종류</span>",
+        tableSelectionSum: "<br><span class=\"small\">선택 합산</span>",
+        typeSummaryNote: "유형은 창 크기의 기대 대비 완화 비율로 산출합니다: (실제+0.5)/(기대+0.5).",
+        typeExplanationTitle: "네 가지 유형 설명",
+        typeOpenDesc: "나와 타인이 함께 인식하는 특성이 많은 유형입니다. 자기표현과 피드백 수용이 비교적 균형을 이루며, 관계에서 투명성과 친밀감이 높게 나타날 수 있습니다.",
+        typeBlindDesc: "타인은 알아보지만 나는 덜 인식하는 특성이 많은 유형입니다. 솔직하고 표현력이 있어 보일 수 있으나, 타인의 피드백을 통해 자기인식을 보완하는 과정이 중요합니다.",
+        typeHiddenDesc: "나는 알고 있지만 타인에게는 덜 드러난 특성이 많은 유형입니다. 신중하고 조심스러운 장점이 있지만, 필요한 만큼 자신을 드러내면 관계의 깊이가 커질 수 있습니다.",
+        typeUnknownDesc: "나와 타인 모두 아직 뚜렷하게 선택하지 않은 특성이 많은 유형입니다. 자기탐색과 다양한 상호작용을 통해 새롭게 발견될 가능성이 큰 영역입니다.",
+        overlapSummaryTitle: "응답 겹침 비교",
+        overlapSummaryHint: "아래 비교는 각 사람이 고른 6개 형용사의 교집합 개수를 기준으로 계산합니다.",
+        overlapSelfPeerTitle: "나와 가장 겹치는 타인",
+        overlapSelfPeerHint: "본인 선택과 각 타인 응답을 비교해 가장 많이 겹친 응답자를 모두 표시합니다.",
+        overlapPeerPeerTitle: "타인끼리 가장 겹치는 조합",
+        overlapPeerPeerHint: "타인 응답자들끼리 서로 비교해 가장 많이 겹친 쌍을 모두 표시합니다.",
+        overlapLeastTitle: "가장 겹치지 않는 조합",
+        overlapLeastHint: "본인과 타인 전체를 모두 포함해 교집합이 가장 적은 쌍을 모두 표시합니다.",
+        overlapNeedResponses: "타인 응답이 들어오면 표시됩니다.",
+        overlapNeedTwoPeers: "타인 응답이 2명 이상일 때 표시됩니다.",
+        overlapNoCompleteDifferent: "완전히 다르게 답한 0개 겹침 조합은 없습니다. 아래는 가장 적게 겹친 조합입니다.",
+        overlapCompleteDifferent: "완전히 다르게 답한 조합입니다.",
+        overlapCount: "{count}개 겹침",
+        overlapNone: "겹치는 형용사 없음",
+        overlapWithSelf: "{name}",
+        overlapPair: "{a} ↔ {b}",
+        pickCount: "{count} / {max} 선택",
+        noName: "이름 없음",
+        noTarget: "대상 미입력",
+        selfNameMissing: "이름 미입력",
+        importEmptyData: "빈 데이터",
+        importWrongFormat: "응답 데이터 형식이 아님",
+        importMissingPicks: "응답 데이터에 6개 선택값이 없음",
+        importDuplicate: "이미 가져온 응답",
+        importFail: "가져오기 실패",
+        importResult: "가져온 응답 {ok}건.",
+        importFailedSuffix: " 실패 {count}건: {messages}",
+        alertCopied: "복사되었습니다.",
+        promptCopy: "아래 내용을 복사하세요.",
+        confirmResetSelf: "본인 선택을 초기화할까요?",
+        alertSelfPick: "본인을 나타내는 형용사를 정확히 {max}개 선택해 주세요. 현재 {count}개 선택했습니다.",
+        alertNames: "본인 이름과 타인 이름을 모두 입력해 주세요.",
+        alertPeerPick: "타인을 나타내는 형용사를 정확히 {max}개 선택해 주세요. 현재 {count}개 선택했습니다.",
+        confirmDeleteResponse: "{name}의 응답을 삭제할까요?",
+        confirmClearResponses: "가져온 타인 응답을 모두 삭제할까요?",
+        footerNote: "이 파일은 서버 없이 작동하는 정적 HTML입니다. 응답 데이터에는 입력한 이름과 선택 정보가 포함되므로, 민감한 개인정보 입력은 피하는 것이 좋습니다.",
+        referencesLabel: "참고문헌 및 출처",
+        referencesTitle: "참고문헌 및 출처",
+        referencesLast: "형용사 56개 목록과 네 영역 분류 방식은 공개 조하리의 창 활동지 및 설명 자료를 참고했습니다. 예: Parity Planner Johari Window worksheet, PsychSafety “The Johari Window”.",
+        langLabel: "언어 선택 / Language selection"
+      },
+      en: {
+        pageTitle: "Johari Window",
+        subtitle: "Compare the 6 adjectives you select with the 6 adjectives selected by others, then automatically organize the Open, Blind, Hidden, and Unknown areas.",
+        sourceNote: "This tool is based on the Johari Window model proposed by Joseph Luft and Harrington Ingham in 1955. The name Johari combines the two researchers’ names, and the four areas compare traits known or unknown to oneself and to others.",
+        sourceLinkLabel: "View Wikipedia summary",
+        tabSelf: "1. Self Selection",
+        tabPeer: "2. Peer Selection",
+        tabResult: "3. View Results",
+        tabListLabel: "Johari Window steps",
+        selfTitle: "Self Selection",
+        selfHint: "Click 6 adjectives from the 56 adjectives below that best describe you. Click again to deselect. The selection count is checked when you move to the next step.",
+        selfNameLabel: "My name",
+        selfNamePlaceholder: "e.g., Minji Kim",
+        selfBoardLabel: "Self-selection adjective list",
+        selfSelectedTitle: "Adjectives I selected",
+        selfEmpty: "No adjectives have been selected yet.",
+        resetSelf: "Reset self selection",
+        goPeer: "Go to peer selection",
+        peerTitle: "Peer Selection",
+        peerHint: "The respondent should enter their own name and the target person's name, then select 6 adjectives they think best describe that person. The selection count is checked when creating response data.",
+        respondentNameLabel: "Your name",
+        respondentRole: "Respondent",
+        targetNameLabel: "Other person’s name",
+        targetRole: "Target",
+        respondentPlaceholder: "e.g., Seojun Lee",
+        targetPlaceholder: "e.g., Minji Kim",
+        peerPromptBlank: "Enter the other person’s name to show the selection prompt.",
+        peerPromptTarget: "Select 6 adjectives you think best describe {target}.",
+        peerBoardLabel: "Peer-selection adjective list",
+        peerSelectedTitle: "Selected adjectives",
+        peerEmpty: "No adjectives have been selected yet.",
+        resetPeer: "Reset peer selection",
+        makeResponse: "Create and copy response data",
+        responseDataTitle: "Response data to copy and share",
+        responseDataHint: "Copy the text below and send it to the person who will view the results. It includes the names and the 6 selected adjectives.",
+        responseDataLabel: "Response data",
+        copyResponse: "Copy response data",
+        createdResponseSummaryTitle: "My Response Collection",
+        createdResponsesHint: "",
+        createdResponseSummaryComplete: "",
+        createdResponseSummaryHint: "",
+        createdResponseBoxTitle: "{respondent} → {target}",
+        createdResponseEmpty: "No response data has been created yet.",
+        deleteCreatedResponse: "Delete selection",
+        deleteCreatedResponseAria: "Delete {respondent}'s response box",
+        confirmDeleteCreatedResponse: "Delete {respondent}'s response box?",
+        createdResponseLoadAria: "Edit {respondent}'s response",
+        responseReadyStatus: "Response data has been saved to My Response Collection.",
+        responseNeedsRemake: "The names or selection were edited. Select exactly 6 adjectives, then click Create response data again.",
+        responseLoadedForEdit: "The selected response has been loaded back into the editing area above. After editing, click Create response data again.",
+        resultTitle: "View Results",
+        resultHint: "Paste response data sent by others to collect who selected which adjectives about whom and calculate the results.",
+        respondentBadge: "Peer responses: {count}",
+        guideLabel: "Four Johari Window area descriptions",
+        openTitle: "Open Area",
+        openGuide: "Traits known by both you and others. This area is where self-awareness and others’ perceptions meet.",
+        blindTitle: "Blind Area",
+        blindGuide: "Traits you did not select but others recognized. These can be discovered through feedback.",
+        hiddenTitle: "Hidden Area",
+        hiddenGuide: "Traits you know about yourself but that are less visible to others. This area is related to self-disclosure.",
+        unknownTitle: "Unknown Area",
+        unknownGuide: "Traits selected by neither you nor others. These may be unexplored or less relevant in this context.",
+        importTitle: "Paste response data",
+        importPlaceholder: "Paste the response data copied and sent by others here. You can paste multiple responses at once.",
+        importBtn: "Import responses",
+        clearRespondents: "Delete all peer responses",
+        exportImage: "Save as image",
+        exportImageBusy: "Creating image...",
+        exportLibraryMissing: "The image export library could not be loaded. Check your internet connection or include html2canvas locally.",
+        exportImageError: "An error occurred while saving the image.",
+        importedResponsesTitle: "Imported responses",
+        importedResponsesTitleWithCount: "Imported responses ({count})",
+        resultPrepareMsg: "Prepare your self selection and peer responses.",
+        selfResponseTitle: "Self response",
+        selfResponseComplete: "{name} selected these 6 adjectives as self-descriptive.",
+        selfResponseIncomplete: "Self selection is not complete yet. Currently selected: {count} / {max}.",
+        noResponses: "No peer responses have been imported yet.",
+        responseCardTitle: "{name}’s response",
+        responseDeleteButton: "Delete selection",
+        responseDeleteAria: "Delete {name}’s response",
+        responseDescription: "{respondent} selected these adjectives as describing {target}.",
+        openDesc: "Traits known by both you and others. This area is where self-awareness and others’ perceptions meet.",
+        blindDesc: "Traits you did not select but others recognized. These can be discovered through feedback.",
+        hiddenDesc: "Traits you know about yourself but that are less visible to others. This area is related to self-disclosure.",
+        unknownDesc: "Traits selected by neither you nor others. These may be unexplored or less relevant in this context.",
+        noneInQuadrant: "No adjectives in this area.",
+        adjectiveCount: "{count}",
+        quadrantAdjectiveCount: "Adjective count: {count}",
+        quadrantSelectionSum: "Selection total: {count}",
+        resultNeedSelf: "You need to select 6 self-descriptive adjectives first.",
+        resultNeedPeer: "Self selection is complete. Import peer response data to fill in the results.",
+        resultDone: "Calculated from your 6 self-selected adjectives and {count} peer response(s).",
+        typeWaitingLabel: "Waiting for peer responses",
+        typeWaitingText: "There are no peer responses yet, so the type cannot be determined reliably.",
+        typeOpen: "Open Type",
+        typeBlind: "Assertive Type",
+        typeHidden: "Cautious Type",
+        typeUnknown: "Isolated Type",
+        typeOpenText: "The Open Area stands out more than expected after accounting for the number of respondents. Your self-awareness and others’ perceptions are relatively aligned, and your traits tend to be expressed naturally in relationships.",
+        typeBlindText: "The Blind Area stands out more than expected after accounting for the number of respondents. Traits others notice may be less included in your own self-perception. Reviewing feedback can broaden self-understanding.",
+        typeHiddenText: "The Hidden Area stands out more than expected after accounting for the number of respondents. Compared with what you know about yourself, those traits may be less visible to others. Gradually increasing self-expression in safe relationships can expand the Open Area.",
+        typeUnknownText: "The Unknown Area stands out more than expected after accounting for the number of respondents. Within this selection, many traits were not clearly identified by either you or others. Self-exploration and interaction across varied situations may help.",
+        typeSummaryTitle: "{name} type: {label}",
+        typeSummaryTitleNoName: "Type: {label}",
+        typeBasis: "Type basis",
+        comparisonTableLabel: "Comparison of totals by window area",
+        tableWindowType: "Area / linked type",
+        tableWindowSize: "Area size<br><span class=\"small\">adjective type count</span>",
+        tableSelectionSum: "<br><span class=\"small\">adjective token count</span>",
+        typeSummaryNote: "The type classification uses a smoothed observed-to-expected ratio for Area size: (observed + 0.5) / (expected + 0.5).",
+        typeExplanationTitle: "Four type descriptions",
+        typeOpenDesc: "A type with many traits recognized by both self and others. Self-expression and receptiveness to feedback are relatively balanced, and relationships may show transparency and closeness.",
+        typeBlindDesc: "A type with many traits others notice but the self recognizes less. The person may appear direct and expressive, while feedback from others is important for improving self-awareness.",
+        typeHiddenDesc: "A type with many traits known to the self but less visible to others. Caution can be a strength, and appropriate self-disclosure can deepen relationships.",
+        typeUnknownDesc: "A type with many traits not clearly selected by either self or others. There is considerable room for new discovery through self-exploration and varied interactions.",
+        overlapSummaryTitle: "Response Overlap Comparison",
+        overlapSummaryHint: "The comparisons below are based on the number of shared adjectives between each person’s 6 selected adjectives.",
+        overlapSelfPeerTitle: "Peers most similar to me",
+        overlapSelfPeerHint: "Compares your self selection with each peer response and shows all respondents tied for the highest overlap.",
+        overlapPeerPeerTitle: "Most similar peer pairs",
+        overlapPeerPeerHint: "Compares peer respondents with each other and shows all pairs tied for the highest overlap.",
+        overlapLeastTitle: "Least overlapping pairs",
+        overlapLeastHint: "Includes both you and all peers, then shows all pairs with the fewest shared adjectives.",
+        overlapNeedResponses: "This will appear after peer responses are imported.",
+        overlapNeedTwoPeers: "This appears when there are at least 2 peer responses.",
+        overlapNoCompleteDifferent: "There are no completely different pairs with 0 shared adjectives. The pairs below have the lowest overlap.",
+        overlapCompleteDifferent: "These pairs answered completely differently.",
+        overlapCount: "{count} shared",
+        overlapNone: "No shared adjectives",
+        overlapWithSelf: "{name}",
+        overlapPair: "{a} ↔ {b}",
+        pickCount: "{count} / {max} selected",
+        noName: "No name",
+        noTarget: "No target entered",
+        selfNameMissing: "Name not entered",
+        importEmptyData: "Empty data",
+        importWrongFormat: "Not a valid response-data format",
+        importMissingPicks: "The response data does not contain 6 selected values",
+        importDuplicate: "Response already imported",
+        importFail: "Import failed",
+        importResult: "Imported responses: {ok}.",
+        importFailedSuffix: " Failed: {count}. Reasons: {messages}",
+        alertCopied: "Copied.",
+        promptCopy: "Copy the text below.",
+        confirmResetSelf: "Reset your self selection?",
+        alertSelfPick: "Please select exactly {max} adjectives that describe you. You currently selected {count}.",
+        alertNames: "Please enter both your name and the other person’s name.",
+        alertPeerPick: "Please select exactly {max} adjectives that describe the other person. You currently selected {count}.",
+        confirmDeleteResponse: "Delete {name}’s response?",
+        confirmClearResponses: "Delete all imported peer responses?",
+        footerNote: "This is a static HTML file that works without a server. Response data includes entered names and selection information, so avoid entering sensitive personal information.",
+        referencesLabel: "References and sources",
+        referencesTitle: "References and sources",
+        referencesLast: "The 56-adjective list and four-area classification method were adapted from publicly available Johari Window worksheets and explanatory materials, including the Parity Planner Johari Window worksheet and PsychSafety “The Johari Window”.",
+        langLabel: "Language selection"
+      }
+    };
+
+    const MAX_PICKS = 6;
+    const STORAGE_SELF = "johari:self:v3";
+    const STORAGE_SELF_NAME = "johari:selfName:v3";
+    const STORAGE_RESPONSES = "johari:responses:v3";
+    const STORAGE_CREATED_RESPONSES = "johari:createdResponses:v1";
+    const STORAGE_LANG = "johari:lang:v1";
+    const RESPONSE_PREFIX = "JOHARI_RESPONSE_V1:";
+
+    let selfPicks = [];
+    let peerPicks = [];
+    let responses = [];
+    let activeTab = "self";
+    let currentLang = localStorage.getItem(STORAGE_LANG) || "ko";
+    let peerResponseStatus = "";
+    let createdResponseDrafts = [];
+    let editingCreatedResponseId = null;
+    if (!I18N[currentLang]) currentLang = "ko";
+
+    const $ = (selector) => document.querySelector(selector);
+    const $$ = (selector) => Array.from(document.querySelectorAll(selector));
+
+    function t(key, vars = {}) {
+      const source = I18N[currentLang][key] ?? I18N.ko[key] ?? key;
+      return String(source).replace(/\{(\w+)\}/g, (_, name) => vars[name] ?? "");
+    }
+
+    function escapeHTML(str) {
+      return String(str ?? "").replace(/[&<>'"]/g, ch => ({
+        "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;"
+      }[ch]));
+    }
+
+    function setText(selector, value) {
+      const el = $(selector);
+      if (el) el.textContent = value;
+    }
+
+    function setAttr(selector, attr, value) {
+      const el = $(selector);
+      if (el) el.setAttribute(attr, value);
+    }
+
+    function setLabelText(inputSelector, labelText, smallText = null) {
+      const input = $(inputSelector);
+      if (!input) return;
+      const label = input.closest("label");
+      if (!label) return;
+      if (label.childNodes.length) label.childNodes[0].nodeValue = `${labelText} `;
+      const small = label.querySelector(".small");
+      if (small && smallText !== null) small.textContent = smallText;
+    }
+
+    function normalizePicks(picks) {
+      return [...new Set((picks || []).map(Number))]
+        .filter(n => Number.isInteger(n) && n >= 0 && n < ADJECTIVES.length)
+        .sort((a, b) => a - b);
+    }
+
+    function encodePicks(picks) {
+      return normalizePicks(picks).join(".");
+    }
+
+    function parsePicks(value) {
+      if (!value || typeof value !== "string") return [];
+      return normalizePicks(value.split(/[.,\-_|\s]+/).map(x => parseInt(x, 10)));
+    }
+
+    function getSelfName() {
+      return $("#selfNameInput").value.trim();
+    }
+
+    function getRespondentName() {
+      return $("#respondentNameInput").value.trim();
+    }
+
+    function getTargetName() {
+      return $("#targetNameInput").value.trim();
+    }
+
+    function displayName(value, fallbackKey) {
+      const raw = String(value || "").trim();
+      if (!raw || raw === "이름 없음" || raw === "No name") return t(fallbackKey || "noName");
+      if (raw === "대상 미입력" || raw === "No target entered") return t("noTarget");
+      if (raw === "이름 미입력" || raw === "Name not entered") return t("selfNameMissing");
+      return raw;
+    }
+
+    function saveSelf() {
+      localStorage.setItem(STORAGE_SELF, encodePicks(selfPicks));
+      localStorage.setItem(STORAGE_SELF_NAME, getSelfName());
+    }
+
+    function loadSelf() {
+      selfPicks = parsePicks(localStorage.getItem(STORAGE_SELF));
+      $("#selfNameInput").value = localStorage.getItem(STORAGE_SELF_NAME) || "";
+      if (!$("#targetNameInput").value && $("#selfNameInput").value) {
+        $("#targetNameInput").value = $("#selfNameInput").value;
+      }
+    }
+
+    function saveResponses() {
+      localStorage.setItem(STORAGE_RESPONSES, JSON.stringify(responses));
+    }
+
+    function loadResponses() {
+      try {
+        const raw = JSON.parse(localStorage.getItem(STORAGE_RESPONSES) || "[]");
+        responses = raw
+          .filter(r => r && Array.isArray(r.picks))
+          .map(r => ({
+            id: String(r.id || makeId()),
+            respondentName: String(r.respondentName || ""),
+            targetName: String(r.targetName || ""),
+            picks: normalizePicks(r.picks),
+            createdAt: r.createdAt || new Date().toISOString()
+          }))
+          .filter(r => r.picks.length === MAX_PICKS);
+      } catch (e) {
+        responses = [];
+      }
+    }
+
+    function saveCreatedResponses() {
+      localStorage.setItem(STORAGE_CREATED_RESPONSES, JSON.stringify(createdResponseDrafts));
+    }
+
+    function loadCreatedResponses() {
+      try {
+        const raw = JSON.parse(localStorage.getItem(STORAGE_CREATED_RESPONSES) || "[]");
+        createdResponseDrafts = raw
+          .filter(r => r && Array.isArray(r.picks))
+          .map(r => ({
+            id: String(r.id || makeId()),
+            respondentName: compactName(r.respondentName || ""),
+            targetName: compactName(r.targetName || ""),
+            picks: normalizePicks(r.picks),
+            data: makeLegacyResponseData({
+              id: String(r.id || makeId()),
+              respondentName: compactName(r.respondentName || ""),
+              targetName: compactName(r.targetName || ""),
+              picks: normalizePicks(r.picks),
+              createdAt: r.createdAt || new Date().toISOString()
+            }),
+            createdAt: r.createdAt || new Date().toISOString(),
+            updatedAt: r.updatedAt || r.createdAt || new Date().toISOString()
+          }))
+          .filter(r => r.picks.length === MAX_PICKS);
+      } catch (e) {
+        createdResponseDrafts = [];
+      }
+    }
+
+    function makeId() {
+      return `r${Date.now().toString(36)}${Math.random().toString(36).slice(2, 8)}`;
+    }
+
+    function setActiveTab(tab) {
+      activeTab = tab;
+      $$(".tab-btn").forEach(btn => btn.classList.toggle("active", btn.dataset.tab === tab));
+      $$(".tab-panel").forEach(panel => panel.classList.remove("active"));
+      $(`#tab-${tab}`).classList.add("active");
+      if (tab === "result") renderResults();
+    }
+
+    function setLanguage(lang) {
+      if (!I18N[lang]) return;
+      currentLang = lang;
+      localStorage.setItem(STORAGE_LANG, currentLang);
+      applyLanguage();
+      renderAll();
+    }
+
+    function applyLanguage() {
+      document.documentElement.lang = currentLang;
+      document.title = t("pageTitle");
+
+      $$(".lang-btn").forEach(btn => {
+        btn.classList.toggle("active", btn.dataset.lang === currentLang);
+        btn.setAttribute("aria-pressed", String(btn.dataset.lang === currentLang));
+      });
+      const languageSwitch = $(".language-switch");
+      if (languageSwitch) languageSwitch.setAttribute("aria-label", t("langLabel"));
+
+      setText("header h1", t("pageTitle"));
+      setText(".subtitle", t("subtitle"));
+      const sourceNote = $(".source-note");
+      if (sourceNote) {
+        sourceNote.innerHTML = `${escapeHTML(t("sourceNote"))} <a href="https://en.wikipedia.org/wiki/Johari_window" target="_blank" rel="noopener noreferrer">${escapeHTML(t("sourceLinkLabel"))}</a>`;
+      }
+
+      const tabs = { self: t("tabSelf"), peer: t("tabPeer"), result: t("tabResult") };
+      Object.entries(tabs).forEach(([key, label]) => {
+        const btn = $(`.tab-btn[data-tab="${key}"]`);
+        if (btn) btn.textContent = label;
+      });
+      const tabList = $(".tabs");
+      if (tabList) tabList.setAttribute("aria-label", t("tabListLabel"));
+
+      setText("#tab-self h2", t("selfTitle"));
+      setText("#tab-self .hint", t("selfHint"));
+      setLabelText("#selfNameInput", t("selfNameLabel"));
+      setAttr("#selfNameInput", "placeholder", t("selfNamePlaceholder"));
+      setAttr("#selfBoard", "aria-label", t("selfBoardLabel"));
+      setText("#tab-self .selected-box h3", t("selfSelectedTitle"));
+      setText("#resetSelfBtn", t("resetSelf"));
+      setText("#goPeerBtn", t("goPeer"));
+
+      setText("#tab-peer h2", t("peerTitle"));
+      setText("#tab-peer .hint", t("peerHint"));
+      setLabelText("#respondentNameInput", t("respondentNameLabel"), t("respondentRole"));
+      setLabelText("#targetNameInput", t("targetNameLabel"), t("targetRole"));
+      setAttr("#respondentNameInput", "placeholder", t("respondentPlaceholder"));
+      setAttr("#targetNameInput", "placeholder", t("targetPlaceholder"));
+      setAttr("#peerBoard", "aria-label", t("peerBoardLabel"));
+      setText("#tab-peer .selected-box h3", t("peerSelectedTitle"));
+      setText("#makeResponseBtn", t("makeResponse"));
+      setText("#responseArea h3", t("createdResponseSummaryTitle"));
+
+      setText("#tab-result .section-title h2", t("resultTitle"));
+      setText("#tab-result > .hint", t("resultHint"));
+      const importColumn = $("#importBox")?.closest("div");
+      if (importColumn) {
+        const h3 = importColumn.querySelector("h3");
+        if (h3) h3.textContent = t("importTitle");
+      }
+      setAttr("#importBox", "placeholder", t("importPlaceholder"));
+      setText("#importBtn", t("importBtn"));
+      setText("#clearRespondentsBtn", t("clearRespondents"));
+      setText("#exportImageBtn", t("exportImage"));
+      setText("#importedResponsesTitle", t("importedResponsesTitleWithCount", { count: responses.length }));
+
+      const footerNote = $("footer > p");
+      if (footerNote) footerNote.textContent = t("footerNote");
+      const references = $(".references");
+      if (references) references.setAttribute("aria-label", t("referencesLabel"));
+      const refStrong = $(".references strong");
+      if (refStrong) refStrong.textContent = t("referencesTitle");
+      const refItems = $$(".references li");
+      if (refItems[3]) refItems[3].textContent = t("referencesLast");
+    }
+
+    function togglePick(listName, index) {
+      const current = listName === "self" ? selfPicks : peerPicks;
+      const next = current.includes(index)
+        ? current.filter(n => n !== index)
+        : normalizePicks([...current, index]);
+
+      if (listName === "self") {
+        selfPicks = next;
+        saveSelf();
+      } else {
+        peerPicks = next;
+        invalidatePeerResponse();
+      }
+      renderAll();
+    }
+
+    function adjectiveStackHTML(idx) {
+      const item = ADJECTIVES[idx];
+      if (currentLang === "en") {
+        return `<span class="word-stack"><span class="eng english-only">${escapeHTML(item.en)}</span></span>`;
+      }
+      return `<span class="word-stack"><span class="ko">${escapeHTML(item.ko)}</span><span class="eng">${escapeHTML(item.en)}</span></span>`;
+    }
+
+    function adjectiveCellHTML(item) {
+      if (currentLang === "en") {
+        return `<span class="eng english-only">${escapeHTML(item.en)}</span>`;
+      }
+      return `<span class="ko">${escapeHTML(item.ko)}</span><span class="eng">${escapeHTML(item.en)}</span>`;
+    }
+
+    function renderAdjectiveBoard(containerId, listName) {
+      const selected = listName === "self" ? selfPicks : peerPicks;
+      const cells = ADJECTIVES.map((item, idx) => {
+        const checked = selected.includes(idx);
+        return `
+          <div class="adjective-cell ${checked ? "selected" : ""}" data-list="${listName}" data-index="${idx}" tabindex="0" role="button" aria-pressed="${checked}">
+            ${adjectiveCellHTML(item)}
+          </div>
+        `;
+      }).join("");
+      $(containerId).innerHTML = `<div class="adjective-grid">${cells}</div>`;
+    }
+
+    function bindAdjectiveCells() {
+      $$(".adjective-cell").forEach(cell => {
+        cell.addEventListener("click", () => togglePick(cell.dataset.list, Number(cell.dataset.index)));
+        cell.addEventListener("keydown", (e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            togglePick(cell.dataset.list, Number(cell.dataset.index));
+          }
+        });
+      });
+    }
+
+    function renderPickBox(containerSelector, picks, emptyKey) {
+      const html = picks.length
+        ? picks.map(idx => `<span class="pill">${adjectiveStackHTML(idx)}</span>`).join("")
+        : `<span class="empty">${escapeHTML(t(emptyKey))}</span>`;
+      const box = $(containerSelector);
+      if (box) box.innerHTML = html;
+    }
+
+    function renderSelectedBoxes() {
+      renderPickBox("#selfSelectedBox", selfPicks, "selfEmpty");
+      renderPickBox("#peerSelectedBox", peerPicks, "peerEmpty");
+    }
+
+    function compactName(value) {
+      return String(value || "").replace(/[\t\r\n]+/g, " ").replace(/\s+/g, " ").trim();
+    }
+
+    function stableHash(value) {
+      let hash = 2166136261;
+      const text = String(value || "");
+      for (let i = 0; i < text.length; i += 1) {
+        hash ^= text.charCodeAt(i);
+        hash = Math.imul(hash, 16777619);
+      }
+      return (hash >>> 0).toString(36);
+    }
+
+    function makeLegacyResponseData(options = {}) {
+      const respondentName = compactName(options.respondentName ?? getRespondentName());
+      const targetName = compactName(options.targetName ?? getTargetName());
+      const picks = normalizePicks(options.picks ?? peerPicks);
+      const payload = {
+        type: "johari-response",
+        version: 1,
+        id: String(options.id || makeId()),
+        respondentName,
+        targetName,
+        picks,
+        createdAt: options.createdAt || new Date().toISOString()
+      };
+      const json = JSON.stringify(payload);
+      const b64 = btoa(unescape(encodeURIComponent(json)));
+      return `${RESPONSE_PREFIX}${b64}`;
+    }
+
+    function makeResponseData(options = {}) {
+      return makeLegacyResponseData(options);
+    }
+
+    function extractResponseCandidates(raw) {
+      const text = String(raw || "");
+      const pattern = /JOHARI_RESPONSE_V1:[A-Za-z0-9+/=]+/g;
+      const matches = text.match(pattern);
+      if (matches && matches.length) return matches;
+      return text.split(/\n+/).map(x => x.trim()).filter(Boolean);
+    }
+
+    function parseResponseData(raw) {
+      const input = String(raw || "").trim();
+      if (!input) throw new Error(t("importEmptyData"));
+      if (!input.startsWith(RESPONSE_PREFIX)) throw new Error(t("importWrongFormat"));
+      const encoded = input.slice(RESPONSE_PREFIX.length).trim();
+      const json = decodeURIComponent(escape(atob(encoded)));
+      const data = JSON.parse(json);
+      const picks = normalizePicks(data.picks);
+      if (data.type !== "johari-response" || picks.length !== MAX_PICKS) {
+        throw new Error(t("importMissingPicks"));
+      }
+      return {
+        id: String(data.id || `legacy-${stableHash(input)}`),
+        respondentName: String(data.respondentName || "").trim(),
+        targetName: String(data.targetName || "").trim(),
+        picks,
+        createdAt: data.createdAt || new Date().toISOString()
+      };
+    }
+
+    function responseAreaIsVisible() {
+      return createdResponseDrafts.length > 0;
+    }
+
+    function updateCopyResponseButton() {
+      // Copy buttons are rendered inside each saved response box.
+    }
+
+    function invalidatePeerResponse() {
+      if (editingCreatedResponseId) {
+        peerResponseStatus = t("responseNeedsRemake");
+      }
+    }
+
+    function clearPeerEditForm() {
+      $("#respondentNameInput").value = "";
+      $("#targetNameInput").value = "";
+      peerPicks = [];
+      editingCreatedResponseId = null;
+    }
+
+    function findCreatedResponse(id) {
+      return createdResponseDrafts.find(item => item.id === id) || null;
+    }
+
+    function loadCreatedResponseDraft(id) {
+      const draft = findCreatedResponse(id);
+      if (!draft) return;
+      $("#respondentNameInput").value = draft.respondentName;
+      $("#targetNameInput").value = draft.targetName;
+      peerPicks = normalizePicks(draft.picks);
+      editingCreatedResponseId = draft.id;
+      peerResponseStatus = t("responseLoadedForEdit");
+      renderAll();
+    }
+
+    function deleteCreatedResponseDraft(id) {
+      const draft = findCreatedResponse(id);
+      if (!draft) return;
+      const respondent = displayName(draft.respondentName, "noName");
+      if (!confirm(t("confirmDeleteCreatedResponse", { respondent }))) return;
+      createdResponseDrafts = createdResponseDrafts.filter(item => item.id !== id);
+      if (editingCreatedResponseId === id) {
+        clearPeerEditForm();
+        peerResponseStatus = "";
+      }
+      saveCreatedResponses();
+      renderAll();
+    }
+
+    function renderCreatedResponseSummary() {
+      const responseArea = $("#responseArea");
+      const box = $("#createdResponseSummary");
+      if (!responseArea || !box) return;
+
+      if (!createdResponseDrafts.length) {
+        responseArea.style.display = "none";
+        box.innerHTML = "";
+        return;
+      }
+
+      responseArea.style.display = "grid";
+      const status = peerResponseStatus
+        ? `<p class="small response-status-message">${escapeHTML(peerResponseStatus)}</p>`
+        : "";
+
+      box.innerHTML = createdResponseDrafts.map((draft, index) => {
+        const respondent = displayName(draft.respondentName, "noName");
+        const target = displayName(draft.targetName, "noTarget");
+        const title = t("createdResponseBoxTitle", { respondent, target });
+        const pills = normalizePicks(draft.picks)
+          .map(idx => `<span class="pill">${adjectiveStackHTML(idx)}</span>`)
+          .join("");
+        const activeClass = editingCreatedResponseId === draft.id ? " selected" : "";
+        return `
+          <article class="generated-response-card${activeClass}" role="button" tabindex="0" data-created-response-id="${escapeHTML(draft.id)}" aria-label="${escapeHTML(t("createdResponseLoadAria", { respondent }))}">
+            <div class="response-card-head">
+              <h3>${escapeHTML(`${index + 1}. ${title}`)}</h3>
+              <button type="button" class="danger delete-created-response-btn" data-delete-created-response="${escapeHTML(draft.id)}" aria-label="${escapeHTML(t("deleteCreatedResponseAria", { respondent }))}">${escapeHTML(t("deleteCreatedResponse"))}</button>
+            </div>
+            <div class="pill-list">${pills}</div>
+            <div class="created-response-copy-row">
+              <textarea class="created-response-data" readonly aria-label="${escapeHTML(t("responseDataLabel"))}">${escapeHTML(draft.data)}</textarea>
+              <div class="created-response-actions">
+                <button type="button" data-copy-created-response="${escapeHTML(draft.id)}">${escapeHTML(t("copyResponse"))}</button>
+              </div>
+            </div>
+          </article>
+        `;
+      }).join("") + status;
+    }
+
+    async function copyToClipboard(text) {
+      try {
+        await navigator.clipboard.writeText(text);
+        alert(t("alertCopied"));
+      } catch (e) {
+        prompt(t("promptCopy"), text);
+      }
+    }
+
+    function importResponses(raw) {
+      const candidates = extractResponseCandidates(raw);
+      let ok = 0;
+      const failed = [];
+      candidates.forEach(candidate => {
+        try {
+          const response = parseResponseData(candidate);
+          if (responses.some(r => r.id === response.id)) {
+            failed.push(t("importDuplicate"));
+            return;
+          }
+          responses.push(response);
+          ok += 1;
+        } catch (e) {
+          failed.push(e.message || t("importFail"));
+        }
+      });
+      saveResponses();
+      return { ok, failed };
+    }
+
+    function getPeerCounts() {
+      const counts = Array(ADJECTIVES.length).fill(0);
+      responses.forEach(r => {
+        r.picks.forEach(idx => counts[idx] += 1);
+      });
+      return counts;
+    }
+
+    function computeQuadrants() {
+      const peerCounts = getPeerCounts();
+      const selfSet = new Set(selfPicks);
+      const windows = {
+        open: { items: [] },
+        blind: { items: [] },
+        hidden: { items: [] },
+        unknown: { items: [] }
+      };
+
+      ADJECTIVES.forEach((item, idx) => {
+        const selfCount = selfSet.has(idx) ? 1 : 0;
+        const peerCount = peerCounts[idx] || 0;
+        const totalCount = selfCount + peerCount;
+        const record = { idx, ...item, selfCount, peerCount, totalCount };
+        if (selfCount && peerCount > 0) windows.open.items.push(record);
+        else if (!selfCount && peerCount > 0) windows.blind.items.push(record);
+        else if (selfCount && peerCount === 0) windows.hidden.items.push(record);
+        else windows.unknown.items.push(record);
+      });
+
+      Object.values(windows).forEach(w => {
+        w.adjectiveCount = w.items.length;
+        w.selectionSum = w.items.reduce((sum, item) => sum + item.totalCount, 0);
+      });
+      return windows;
+    }
+
+    function getWindowTitle(key) {
+      return t(`${key}Title`);
+    }
+
+    function getWindowDesc(key) {
+      return t(`${key}Desc`);
+    }
+
+    function getTypeLabel(windows) {
+      if (responses.length === 0) {
+        return { label: t("typeWaitingLabel"), text: t("typeWaitingText"), top: null, entries: [] };
+      }
+
+      const respondentCount = responses.length;
+      const adjectiveTotal = ADJECTIVES.length;
+      const pickCount = MAX_PICKS;
+      const p = pickCount / adjectiveTotal;
+      const q = 1 - Math.pow(1 - p, respondentCount);
+
+      const expectedByKey = {
+        open: pickCount * q + respondentCount * pickCount * p,
+        hidden: pickCount * (1 - q),
+        blind: respondentCount * pickCount * (1 - p),
+        unknown: (adjectiveTotal - pickCount) * (1 - q)
+      };
+
+      const observedByKey = {
+        open: windows.open.selectionSum,
+        hidden: windows.hidden.selectionSum,
+        blind: windows.blind.selectionSum,
+        unknown: windows.unknown.adjectiveCount
+      };
+
+      const entries = Object.entries(windows).map(([key, w]) => ({
+        key,
+        title: getWindowTitle(key),
+        adjectiveCount: w.adjectiveCount,
+        selectionSum: w.selectionSum,
+        observedForType: observedByKey[key],
+        expectedForType: expectedByKey[key],
+        ratioScore: (observedByKey[key] + 0.5) / (expectedByKey[key] + 0.5)
+      })).sort((a, b) =>
+        (b.ratioScore - a.ratioScore) ||
+        (b.selectionSum - a.selectionSum) ||
+        (b.adjectiveCount - a.adjectiveCount)
+      );
+
+      const top = entries[0];
+      const descriptions = {
+        open: [t("typeOpen"), t("typeOpenText")],
+        blind: [t("typeBlind"), t("typeBlindText")],
+        hidden: [t("typeHidden"), t("typeHiddenText")],
+        unknown: [t("typeUnknown"), t("typeUnknownText")]
+      };
+      const [label, text] = descriptions[top.key];
+      return { label, text, top, entries };
+    }
+
+    function renderSelfResponseTop() {
+      const box = $("#selfResponseTop");
+      if (!box) return;
+      const selfName = getSelfName() || t("selfNameMissing");
+      const currentCount = selfPicks.length;
+      const picksHTML = selfPicks.length
+        ? selfPicks.map(idx => `<span class="pill">${adjectiveStackHTML(idx)}</span>`).join("")
+        : `<span class="empty">${escapeHTML(t("selfEmpty"))}</span>`;
+      const statusHTML = currentCount === MAX_PICKS
+        ? `<p class="small">${escapeHTML(t("selfResponseComplete", { name: selfName }))}</p>`
+        : `<p class="notice warn" style="margin:8px 0 12px;">${escapeHTML(t("selfResponseIncomplete", { count: currentCount, max: MAX_PICKS }))}</p>`;
+
+      box.innerHTML = `
+        <h3>${escapeHTML(t("selfResponseTitle"))}</h3>
+        ${statusHTML}
+        <div class="pill-list">${picksHTML}</div>
+      `;
+    }
+
+    function updateImportedResponsesTitle() {
+      setText("#importedResponsesTitle", t("importedResponsesTitleWithCount", { count: responses.length }));
+    }
+
+    function renderResponseList() {
+      updateImportedResponsesTitle();
+      if (!responses.length) {
+        $("#responseList").innerHTML = `<p class="empty">${escapeHTML(t("noResponses"))}</p>`;
+        return;
+      }
+      $("#responseList").innerHTML = responses.map((r, index) => {
+        const respondent = displayName(r.respondentName, "noName");
+        const target = displayName(r.targetName, "noTarget");
+        return `
+          <article class="response-card">
+            <div class="response-card-head">
+              <h3>${escapeHTML(t("responseCardTitle", { name: respondent }))}</h3>
+              <button type="button" class="danger delete-response-btn" data-response-index="${index}" aria-label="${escapeHTML(t("responseDeleteAria", { name: respondent }))}">${escapeHTML(t("responseDeleteButton"))}</button>
+            </div>
+            <p class="small">${escapeHTML(t("responseDescription", { respondent, target }))}</p>
+            <div class="pill-list">
+              ${r.picks.map(idx => `<span class="pill">${adjectiveStackHTML(idx)}</span>`).join("")}
+            </div>
+          </article>
+        `;
+      }).join("");
+    }
+
+    function deleteResponseAt(index) {
+      if (!Number.isInteger(index) || index < 0 || index >= responses.length) return;
+      const response = responses[index];
+      const name = displayName(response.respondentName, "noName");
+      if (!confirm(t("confirmDeleteResponse", { name }))) return;
+      responses.splice(index, 1);
+      saveResponses();
+      renderResults();
+    }
+
+    function renderQuadrantPill(item) {
+      const adjectiveHTML = currentLang === "en"
+        ? `<span class="eng english-only">${escapeHTML(item.en)}</span>`
+        : `<span class="ko">${escapeHTML(item.ko)}</span><span class="eng">${escapeHTML(item.en)}</span>`;
+      return `
+        <span class="pill" title="Self ${item.selfCount}, Peer ${item.peerCount}">
+          ${adjectiveHTML}
+          <span class="num">${item.totalCount}</span>
+        </span>
+      `;
+    }
+
+    function renderQuadrantCard(key, data) {
+      const pills = data.items.length
+        ? data.items.map(item => renderQuadrantPill(item)).join("")
+        : `<span class="empty">${escapeHTML(t("noneInQuadrant"))}</span>`;
+      return `
+        <article class="quadrant" data-window="${key}">
+          <div class="quadrant-head">
+            <h3>${escapeHTML(getWindowTitle(key))}</h3>
+            <span class="count-badge">${escapeHTML(t("adjectiveCount", { count: data.adjectiveCount }))}</span>
+          </div>
+          <div class="quadrant-body">
+            <p class="mini-desc">${escapeHTML(getWindowDesc(key))}</p>
+            <div class="pill-list">${pills}</div>
+            <div class="quad-foot">
+              <strong>${escapeHTML(t("quadrantAdjectiveCount", { count: data.adjectiveCount }))}</strong>
+              <strong>${escapeHTML(t("quadrantSelectionSum", { count: data.selectionSum }))}</strong>
+            </div>
+          </div>
+        </article>
+      `;
+    }
+
+    function intersectPicks(a, b) {
+      const bSet = new Set(normalizePicks(b));
+      return normalizePicks(a).filter(idx => bSet.has(idx));
+    }
+
+    function adjectivePillsHTML(picks) {
+      return picks.length
+        ? picks.map(idx => `<span class="pill">${adjectiveStackHTML(idx)}</span>`).join("")
+        : `<span class="empty">${escapeHTML(t("overlapNone"))}</span>`;
+    }
+
+    function renderMatchList(matches) {
+      return matches.map(match => `
+        <div class="match-item">
+          <div class="match-title">
+            ${escapeHTML(match.title)}
+            <span class="match-count">${escapeHTML(t("overlapCount", { count: match.count }))}</span>
+          </div>
+          <div class="pill-list">${adjectivePillsHTML(match.overlap)}</div>
+        </div>
+      `).join("");
+    }
+
+    function makeParticipants() {
+      const selfName = getSelfName().trim() || t("selfNameMissing");
+      const self = { id: "self", kind: "self", name: selfName, picks: normalizePicks(selfPicks) };
+      const peers = responses.map((r, index) => ({
+        id: r.id || `peer-${index}`,
+        kind: "peer",
+        name: displayName(r.respondentName, "noName"),
+        picks: normalizePicks(r.picks),
+        index
+      }));
+      return { self, peers, all: [self, ...peers] };
+    }
+
+    function topSelfPeerMatches(self, peers) {
+      if (!peers.length) return [];
+      const scored = peers.map(peer => {
+        const overlap = intersectPicks(self.picks, peer.picks);
+        return {
+          title: t("overlapWithSelf", { name: peer.name }),
+          count: overlap.length,
+          overlap
+        };
+      });
+      const maxCount = Math.max(...scored.map(item => item.count));
+      return scored.filter(item => item.count === maxCount);
+    }
+
+    function pairwiseMatches(participants, mode) {
+      const pairs = [];
+      for (let i = 0; i < participants.length; i += 1) {
+        for (let j = i + 1; j < participants.length; j += 1) {
+          const a = participants[i];
+          const b = participants[j];
+          const overlap = intersectPicks(a.picks, b.picks);
+          pairs.push({
+            title: t("overlapPair", { a: a.name, b: b.name }),
+            count: overlap.length,
+            overlap
+          });
+        }
+      }
+      if (!pairs.length) return { matches: [], targetCount: null };
+      const counts = pairs.map(pair => pair.count);
+      const targetCount = mode === "min" ? Math.min(...counts) : Math.max(...counts);
+      return { matches: pairs.filter(pair => pair.count === targetCount), targetCount };
+    }
+
+    function renderOverlapSection(title, hint, bodyHTML) {
+      return `
+        <article class="overlap-section">
+          <h3>${escapeHTML(title)}</h3>
+          <p class="small">${escapeHTML(hint)}</p>
+          ${bodyHTML}
+        </article>
+      `;
+    }
+
+    function renderOverlapSummary() {
+      const box = $("#overlapSummary");
+      if (!box) return;
+      if (selfPicks.length !== MAX_PICKS) {
+        box.style.display = "none";
+        box.innerHTML = "";
+        return;
+      }
+
+      const { self, peers, all } = makeParticipants();
+      const selfPeerMatches = topSelfPeerMatches(self, peers);
+      const peerPeer = pairwiseMatches(peers, "max");
+      const least = pairwiseMatches(all, "min");
+
+      const selfPeerBody = peers.length
+        ? `<div class="match-list">${renderMatchList(selfPeerMatches)}</div>`
+        : `<p class="empty">${escapeHTML(t("overlapNeedResponses"))}</p>`;
+
+      const peerPeerBody = peers.length >= 2
+        ? `<div class="match-list">${renderMatchList(peerPeer.matches)}</div>`
+        : `<p class="empty">${escapeHTML(t("overlapNeedTwoPeers"))}</p>`;
+
+      let leastIntro = "";
+      if (least.matches.length) {
+        leastIntro = `<p class="small" style="margin-top:10px;">${escapeHTML(least.targetCount === 0 ? t("overlapCompleteDifferent") : t("overlapNoCompleteDifferent"))}</p>`;
+      }
+      const leastBody = peers.length
+        ? `${leastIntro}<div class="match-list">${renderMatchList(least.matches)}</div>`
+        : `<p class="empty">${escapeHTML(t("overlapNeedResponses"))}</p>`;
+
+      box.style.display = "block";
+      box.innerHTML = `
+        <h3>${escapeHTML(t("overlapSummaryTitle"))}</h3>
+        <p>${escapeHTML(t("overlapSummaryHint"))}</p>
+        <div class="overlap-grid">
+          ${renderOverlapSection(t("overlapSelfPeerTitle"), t("overlapSelfPeerHint"), selfPeerBody)}
+          ${renderOverlapSection(t("overlapPeerPeerTitle"), t("overlapPeerPeerHint"), peerPeerBody)}
+          ${renderOverlapSection(t("overlapLeastTitle"), t("overlapLeastHint"), leastBody)}
+        </div>
+      `;
+    }
+
+    function renderTypeSummary(windows) {
+      const summary = getTypeLabel(windows);
+      const maxCount = Math.max(...Object.values(windows).map(w => w.adjectiveCount), 1);
+      const typeByKey = {
+        open: t("typeOpen"),
+        blind: t("typeBlind"),
+        hidden: t("typeHidden"),
+        unknown: t("typeUnknown")
+      };
+      const typeDescriptions = {
+        open: t("typeOpenDesc"),
+        blind: t("typeBlindDesc"),
+        hidden: t("typeHiddenDesc"),
+        unknown: t("typeUnknownDesc")
+      };
+      const rows = ["open", "blind", "hidden", "unknown"].map(key => {
+        const w = windows[key];
+        const mark = summary.top && summary.top.key === key ? `<span class="type-badge">${escapeHTML(t("typeBasis"))}</span>` : "";
+        return `
+          <tr>
+            <td><strong>${escapeHTML(getWindowTitle(key))}</strong>${mark}<br><span class="small">${escapeHTML(typeByKey[key])}</span></td>
+            <td>${escapeHTML(t("adjectiveCount", { count: w.adjectiveCount }))}</td>
+            <td>${escapeHTML(currentLang === "en" ? String(w.selectionSum) : `${w.selectionSum}회`)}</td>
+          </tr>
+        `;
+      }).join("");
+      const bars = ["open", "blind", "hidden", "unknown"].map(key => {
+        const w = windows[key];
+        const pct = Math.round((w.adjectiveCount / maxCount) * 100);
+        return `
+          <div class="bar-line">
+            <strong>${escapeHTML(getWindowTitle(key))}</strong>
+            <div class="bar-track" aria-hidden="true"><div class="bar-fill" style="width:${pct}%"></div></div>
+            <span>${escapeHTML(t("adjectiveCount", { count: w.adjectiveCount }))}</span>
+          </div>
+        `;
+      }).join("");
+      const typeCards = ["open", "blind", "hidden", "unknown"].map(key => `
+        <article class="guide-item">
+          <h3>${escapeHTML(typeByKey[key])}</h3>
+          <p>${escapeHTML(typeDescriptions[key])}</p>
+        </article>
+      `).join("");
+
+      const name = getSelfName().trim();
+      const resultTitle = name
+        ? t("typeSummaryTitle", { name: currentLang === "ko" ? `${name}의 ` : `${name}’s`, label: summary.label })
+        : t("typeSummaryTitleNoName", { label: summary.label });
+
+      $("#typeSummary").style.display = "block";
+      $("#typeSummary").innerHTML = `
+        <h3>${escapeHTML(resultTitle)}</h3>
+        <p>${escapeHTML(summary.text)}</p>
+        <table class="comparison-table" aria-label="${escapeHTML(t("comparisonTableLabel"))}">
+          <thead>
+            <tr><th>${t("tableWindowType")}</th><th>${t("tableWindowSize")}</th><th>${t("tableSelectionSum")}</th></tr>
+          </thead>
+          <tbody>${rows}</tbody>
+        </table>
+        <div class="bars">${bars}</div>
+        <p class="small">${escapeHTML(t("typeSummaryNote"))}</p>
+        <div class="summary-card" style="margin-top:16px; padding:14px;">
+          <h3>${escapeHTML(t("typeExplanationTitle"))}</h3>
+          <div class="guide-grid" style="margin-bottom:0;">${typeCards}</div>
+        </div>
+      `;
+    }
+
+    function renderResults() {
+      loadResponses();
+      $("#respondentBadge").textContent = t("respondentBadge", { count: responses.length });
+      updateImportedResponsesTitle();
+      renderSelfResponseTop();
+      renderResponseList();
+
+      if (selfPicks.length !== MAX_PICKS) {
+        $("#typeSummary").style.display = "none";
+        const overlapSummary = $("#overlapSummary");
+        if (overlapSummary) {
+          overlapSummary.style.display = "none";
+          overlapSummary.innerHTML = "";
+        }
+        $("#quadrants").innerHTML = "";
+        return;
+      }
+
+      const windows = computeQuadrants();
+      renderTypeSummary(windows);
+      renderOverlapSummary();
+      $("#quadrants").innerHTML = ["open", "blind", "hidden", "unknown"].map(key => renderQuadrantCard(key, windows[key])).join("");
+    }
+
+    function updatePeerPrompt() {
+      const target = getTargetName();
+      $("#peerPrompt").textContent = target
+        ? t("peerPromptTarget", { target })
+        : t("peerPromptBlank");
+    }
+
+    function renderAll() {
+      renderAdjectiveBoard("#selfBoard", "self");
+      renderAdjectiveBoard("#peerBoard", "peer");
+      bindAdjectiveCells();
+      renderSelectedBoxes();
+      updatePeerPrompt();
+
+      $("#selfCount").textContent = t("pickCount", { count: selfPicks.length, max: MAX_PICKS });
+      $("#peerCount").textContent = t("pickCount", { count: peerPicks.length, max: MAX_PICKS });
+      $("#goPeerBtn").disabled = false;
+      $("#makeResponseBtn").disabled = false;
+      renderCreatedResponseSummary();
+      updateCopyResponseButton();
+      if (activeTab === "result") renderResults();
+    }
+
+
+    async function exportResultAsImage() {
+      if (typeof html2canvas === "undefined") {
+        alert(t("exportLibraryMissing"));
+        return;
+      }
+
+      if (selfPicks.length !== MAX_PICKS) {
+        alert(t("resultNeedSelf"));
+        return;
+      }
+
+      const btn = $("#exportImageBtn");
+      if (btn) {
+        btn.disabled = true;
+        btn.textContent = t("exportImageBusy");
+      }
+
+      let sheet = null;
+      try {
+        setActiveTab("result");
+        renderResults();
+
+        await new Promise(resolve => requestAnimationFrame(resolve));
+        if (document.fonts && document.fonts.ready) {
+          await document.fonts.ready;
+        }
+
+        sheet = document.createElement("div");
+        sheet.className = "export-sheet card";
+
+        sheet.innerHTML = `
+          <div class="export-header">
+            <h1 class="export-title">${escapeHTML(t("pageTitle"))}</h1>
+            <h2 class="export-subtitle">${escapeHTML(t("resultTitle"))}</h2>
+          </div>
+        `;
+
+        ["#selfResponseTop", "#quadrants", "#typeSummary", "#overlapSummary"].forEach(selector => {
+          const el = $(selector);
+          if (!el) return;
+          if (!el.innerHTML.trim()) return;
+          if (getComputedStyle(el).display === "none") return;
+          sheet.appendChild(el.cloneNode(true));
+        });
+
+        document.body.appendChild(sheet);
+
+        const canvas = await html2canvas(sheet, {
+          backgroundColor: "#fff8ef",
+          scale: Math.min(window.devicePixelRatio || 2, 3),
+          useCORS: true
+        });
+
+        const rawName = getSelfName() || "johari";
+        const safeName = rawName
+          .replace(/[\\/:*?"<>|]+/g, "_")
+          .trim() || "johari";
+
+        const link = document.createElement("a");
+        link.download = `johari-window-${safeName}-${new Date().toISOString().slice(0, 10)}.png`;
+        link.href = canvas.toDataURL("image/png");
+        link.click();
+      } catch (e) {
+        console.error(e);
+        alert(t("exportImageError"));
+      } finally {
+        if (sheet) sheet.remove();
+        if (btn) {
+          btn.disabled = false;
+          btn.textContent = t("exportImage");
+        }
+      }
+    }
+
+    function bindControls() {
+      $$(".tab-btn").forEach(btn => btn.addEventListener("click", () => setActiveTab(btn.dataset.tab)));
+      $$(".lang-btn").forEach(btn => btn.addEventListener("click", () => setLanguage(btn.dataset.lang)));
+
+      $("#selfNameInput").addEventListener("input", () => {
+        saveSelf();
+        if (!$("#targetNameInput").value.trim()) $("#targetNameInput").value = getSelfName();
+        renderAll();
+      });
+
+      $("#respondentNameInput").addEventListener("input", () => {
+        invalidatePeerResponse();
+        renderAll();
+      });
+      $("#targetNameInput").addEventListener("input", () => {
+        invalidatePeerResponse();
+        renderAll();
+      });
+
+      $("#resetSelfBtn").addEventListener("click", () => {
+        if (!confirm(t("confirmResetSelf"))) return;
+        selfPicks = [];
+        localStorage.removeItem(STORAGE_SELF);
+        setActiveTab("self");
+        renderAll();
+      });
+
+      $("#goPeerBtn").addEventListener("click", () => {
+        if (selfPicks.length !== MAX_PICKS) {
+          alert(t("alertSelfPick", { max: MAX_PICKS, count: selfPicks.length }));
+          return;
+        }
+        setActiveTab("peer");
+      });
+
+
+      $("#makeResponseBtn").addEventListener("click", async () => {
+        const respondentName = getRespondentName();
+        const targetName = getTargetName();
+        if (!respondentName || !targetName) {
+          alert(t("alertNames"));
+          return;
+        }
+        if (peerPicks.length !== MAX_PICKS) {
+          alert(t("alertPeerPick", { max: MAX_PICKS, count: peerPicks.length }));
+          return;
+        }
+        const respondentNameClean = compactName(respondentName);
+        const targetNameClean = compactName(targetName);
+        const picks = normalizePicks(peerPicks);
+        const now = new Date().toISOString();
+        const draftId = editingCreatedResponseId || makeId();
+        const existingIndex = createdResponseDrafts.findIndex(item => item.id === draftId);
+        const createdAt = existingIndex >= 0 ? (createdResponseDrafts[existingIndex].createdAt || now) : now;
+        const data = makeResponseData({
+          id: draftId,
+          respondentName: respondentNameClean,
+          targetName: targetNameClean,
+          picks,
+          createdAt
+        });
+        const draft = {
+          id: draftId,
+          respondentName: respondentNameClean,
+          targetName: targetNameClean,
+          picks,
+          data,
+          createdAt,
+          updatedAt: now
+        };
+        if (existingIndex >= 0) {
+          createdResponseDrafts[existingIndex] = draft;
+        } else {
+          createdResponseDrafts.push(draft);
+        }
+        saveCreatedResponses();
+        await copyToClipboard(data);
+        peerResponseStatus = t("responseReadyStatus");
+        clearPeerEditForm();
+        renderAll();
+      });
+
+      $("#createdResponseSummary").addEventListener("click", (e) => {
+        const deleteBtn = e.target.closest("[data-delete-created-response]");
+        if (deleteBtn) {
+          e.stopPropagation();
+          deleteCreatedResponseDraft(deleteBtn.dataset.deleteCreatedResponse);
+          return;
+        }
+        const copyBtn = e.target.closest("[data-copy-created-response]");
+        if (copyBtn) {
+          e.stopPropagation();
+          const draft = findCreatedResponse(copyBtn.dataset.copyCreatedResponse);
+          if (draft) copyToClipboard(draft.data);
+          return;
+        }
+        if (e.target.closest(".created-response-data")) return;
+        const card = e.target.closest("[data-created-response-id]");
+        if (card) loadCreatedResponseDraft(card.dataset.createdResponseId);
+      });
+
+      $("#createdResponseSummary").addEventListener("keydown", (e) => {
+        if (e.key !== "Enter" && e.key !== " ") return;
+        const card = e.target.closest("[data-created-response-id]");
+        if (!card) return;
+        e.preventDefault();
+        loadCreatedResponseDraft(card.dataset.createdResponseId);
+      });
+
+      $("#exportImageBtn").addEventListener("click", exportResultAsImage);
+
+      $("#importBtn").addEventListener("click", () => {
+        loadResponses();
+        const result = importResponses($("#importBox").value);
+        renderAll();
+        setActiveTab("result");
+        const failText = result.failed.length
+          ? t("importFailedSuffix", { count: result.failed.length, messages: [...new Set(result.failed)].join(", ") })
+          : "";
+        $("#importMsg").textContent = `${t("importResult", { ok: result.ok })}${failText}`;
+      });
+
+      $("#responseList").addEventListener("click", (e) => {
+        const deleteBtn = e.target.closest(".delete-response-btn");
+        if (!deleteBtn) return;
+        deleteResponseAt(Number(deleteBtn.dataset.responseIndex));
+      });
+
+      $("#clearRespondentsBtn").addEventListener("click", () => {
+        if (!confirm(t("confirmClearResponses"))) return;
+        responses = [];
+        saveResponses();
+        renderResults();
+      });
+    }
+
+    function init() {
+      bindControls();
+      loadSelf();
+      loadResponses();
+      loadCreatedResponses();
+      applyLanguage();
+      renderAll();
+    }
+
+    init();
+  </script>
+</body>
+
+</html>
