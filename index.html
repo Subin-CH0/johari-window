@@ -788,7 +788,7 @@
         <h2>본인 선택</h2>
         <span id="selfCount" class="count-badge">0 / 6 선택</span>
       </div>
-      <p class="hint">아래 56개 형용사 중 본인을 잘 나타내는 형용사 6개를 클릭하세요. 다시 클릭하면 선택이 해제됩니다.</p>
+      <p class="hint">아래 56개 형용사 중 본인을 잘 나타내는 형용사 6개를 클릭하세요. 다시 클릭하면 선택이 해제됩니다. 선택 개수는 이동 버튼을 누를 때 확인합니다.</p>
 
       <div class="name-grid">
         <label>내 이름
@@ -805,7 +805,7 @@
 
       <div class="toolbar">
         <button id="resetSelfBtn" type="button" class="danger">본인 선택 초기화</button>
-        <button id="goPeerBtn" type="button" class="secondary" disabled>타인 선택으로 이동</button>
+        <button id="goPeerBtn" type="button" class="secondary">타인 선택으로 이동</button>
       </div>
     </section>
 
@@ -814,7 +814,7 @@
         <h2>타인 선택</h2>
         <span id="peerCount" class="count-badge">0 / 6 선택</span>
       </div>
-      <p class="hint">응답자는 자신의 이름과 평가 대상의 이름을 입력한 뒤, 그 사람을 잘 나타낸다고 생각하는 형용사 6개를 선택하세요.</p>
+      <p class="hint">응답자는 자신의 이름과 평가 대상의 이름을 입력한 뒤, 그 사람을 잘 나타낸다고 생각하는 형용사 6개를 선택하세요. 선택 개수는 응답 데이터 만들기 버튼을 누를 때 확인합니다.</p>
 
       <div class="name-grid">
         <label>본인 이름 <span class="small">응답자</span>
@@ -829,9 +829,14 @@
 
       <div id="peerBoard" class="adjective-board" aria-label="타인 선택 형용사 목록"></div>
 
+      <div class="selected-box" aria-live="polite">
+        <h3>선택한 형용사</h3>
+        <div id="peerSelectedBox" class="pill-list"><span class="empty">아직 선택한 형용사가 없습니다.</span></div>
+      </div>
+
       <div class="toolbar">
         <button id="resetPeerBtn" type="button" class="plain">타인 선택 초기화</button>
-        <button id="makeResponseBtn" type="button" disabled>응답 데이터 만들기</button>
+        <button id="makeResponseBtn" type="button">응답 데이터 만들기</button>
       </div>
 
       <div id="responseArea" class="copy-panel" style="display:none;">
@@ -1065,25 +1070,19 @@
 
     function togglePick(listName, index) {
       const current = listName === "self" ? selfPicks : peerPicks;
-      let next;
-      if (current.includes(index)) {
-        next = current.filter(n => n !== index);
-      } else {
-        if (current.length >= MAX_PICKS) {
-          alert(`최대 ${MAX_PICKS}개까지만 선택할 수 있습니다.`);
-          return;
-        }
-        next = normalizePicks([...current, index]);
-      }
+      const next = current.includes(index)
+        ? current.filter(n => n !== index)
+        : normalizePicks([...current, index]);
 
       if (listName === "self") {
         selfPicks = next;
         saveSelf();
-        if (selfPicks.length === MAX_PICKS) {
-          setTimeout(() => setActiveTab("peer"), 220);
-        }
       } else {
         peerPicks = next;
+        const responseArea = $("#responseArea");
+        const responseData = $("#responseData");
+        if (responseArea) responseArea.style.display = "none";
+        if (responseData) responseData.value = "";
       }
       renderAll();
     }
@@ -1123,11 +1122,17 @@
       });
     }
 
-    function renderSelectedBox() {
-      const html = selfPicks.length
-        ? selfPicks.map(idx => `<span class="pill">${adjectiveStackHTML(idx)}</span>`).join("")
-        : `<span class="empty">아직 선택한 형용사가 없습니다.</span>`;
-      $("#selfSelectedBox").innerHTML = html;
+    function renderPickBox(containerSelector, picks, emptyText) {
+      const html = picks.length
+        ? picks.map(idx => `<span class="pill">${adjectiveStackHTML(idx)}</span>`).join("")
+        : `<span class="empty">${escapeHTML(emptyText)}</span>`;
+      const box = $(containerSelector);
+      if (box) box.innerHTML = html;
+    }
+
+    function renderSelectedBoxes() {
+      renderPickBox("#selfSelectedBox", selfPicks, "아직 선택한 형용사가 없습니다.");
+      renderPickBox("#peerSelectedBox", peerPicks, "아직 선택한 형용사가 없습니다.");
     }
 
     function makeResponseData() {
@@ -1426,15 +1431,13 @@
       renderAdjectiveBoard("#selfBoard", "self");
       renderAdjectiveBoard("#peerBoard", "peer");
       bindAdjectiveCells();
-      renderSelectedBox();
+      renderSelectedBoxes();
       updatePeerPrompt();
 
       $("#selfCount").textContent = `${selfPicks.length} / ${MAX_PICKS} 선택`;
       $("#peerCount").textContent = `${peerPicks.length} / ${MAX_PICKS} 선택`;
-      $("#goPeerBtn").disabled = selfPicks.length !== MAX_PICKS;
-
-      const readyForResponse = getRespondentName() && getTargetName() && peerPicks.length === MAX_PICKS;
-      $("#makeResponseBtn").disabled = !readyForResponse;
+      $("#goPeerBtn").disabled = false;
+      $("#makeResponseBtn").disabled = false;
       if (activeTab === "result") renderResults();
     }
 
@@ -1458,7 +1461,13 @@
         renderAll();
       });
 
-      $("#goPeerBtn").addEventListener("click", () => setActiveTab("peer"));
+      $("#goPeerBtn").addEventListener("click", () => {
+        if (selfPicks.length !== MAX_PICKS) {
+          alert(`본인을 나타내는 형용사를 정확히 ${MAX_PICKS}개 선택해 주세요. 현재 ${selfPicks.length}개 선택했습니다.`);
+          return;
+        }
+        setActiveTab("peer");
+      });
 
       $("#resetPeerBtn").addEventListener("click", () => {
         peerPicks = [];
@@ -1468,6 +1477,16 @@
       });
 
       $("#makeResponseBtn").addEventListener("click", () => {
+        const respondentName = getRespondentName();
+        const targetName = getTargetName();
+        if (!respondentName || !targetName) {
+          alert("본인 이름과 타인 이름을 모두 입력해 주세요.");
+          return;
+        }
+        if (peerPicks.length !== MAX_PICKS) {
+          alert(`타인을 나타내는 형용사를 정확히 ${MAX_PICKS}개 선택해 주세요. 현재 ${peerPicks.length}개 선택했습니다.`);
+          return;
+        }
         const data = makeResponseData();
         $("#responseData").value = data;
         $("#responseArea").style.display = "grid";
