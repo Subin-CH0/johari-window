@@ -488,8 +488,32 @@
       margin-bottom: 6px;
     }
 
+    .response-card-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 10px;
+      margin-bottom: 6px;
+    }
+
+    .response-card-head h3 {
+      margin: 0;
+    }
+
+    .delete-response-btn {
+      flex: 0 0 auto;
+      padding: 7px 10px;
+      border-radius: 999px;
+      font-size: 13px;
+    }
+
     .response-card+.response-card {
       margin-top: 10px;
+    }
+
+    .self-response-top {
+      margin: 16px 0 18px;
+      background: linear-gradient(180deg, #fffaf4 0%, #ffffff 100%);
     }
 
     .bars {
@@ -734,6 +758,14 @@
         padding: 12px 13px;
       }
 
+      .response-card-head {
+        align-items: stretch;
+      }
+
+      .delete-response-btn {
+        width: 100%;
+      }
+
       .pill {
         border-radius: 14px;
         align-items: center;
@@ -855,6 +887,8 @@
         <span id="respondentBadge" class="count-badge">타인 응답 0명</span>
       </div>
       <p class="hint">타인이 보내준 응답 데이터를 붙여 넣으면, 각 사람이 누구에 대해 어떤 형용사를 골랐는지 모아보고 결과를 계산할 수 있습니다.</p>
+
+      <div id="selfResponseTop" class="response-card self-response-top" aria-live="polite"></div>
 
       <div class="guide-grid" aria-label="조하리의 창 네 영역 설명">
         <article class="guide-item">
@@ -1284,20 +1318,52 @@
       return { label, text, top, entries };
     }
 
+    function renderSelfResponseTop() {
+      const box = $("#selfResponseTop");
+      if (!box) return;
+      const selfName = getSelfName() || "이름 미입력";
+      const currentCount = selfPicks.length;
+      const picksHTML = selfPicks.length
+        ? selfPicks.map(idx => `<span class="pill">${adjectiveStackHTML(idx)}</span>`).join("")
+        : `<span class="empty">아직 선택한 형용사가 없습니다.</span>`;
+      const statusHTML = currentCount === MAX_PICKS
+        ? `<p class="small">${escapeHTML(selfName)}이/가 본인을 잘 나타낸다고 선택한 형용사 6개입니다.</p>`
+        : `<p class="notice warn" style="margin:8px 0 12px;">본인 선택이 아직 완료되지 않았습니다. 현재 ${currentCount} / ${MAX_PICKS}개 선택했습니다.</p>`;
+
+      box.innerHTML = `
+        <h3>본인 응답</h3>
+        ${statusHTML}
+        <div class="pill-list">${picksHTML}</div>
+      `;
+    }
+
     function renderResponseList() {
       if (!responses.length) {
         $("#responseList").innerHTML = `<p class="empty">아직 가져온 타인 응답이 없습니다.</p>`;
         return;
       }
-      $("#responseList").innerHTML = responses.map(r => `
+      $("#responseList").innerHTML = responses.map((r, index) => `
         <article class="response-card">
-          <h3>${escapeHTML(r.respondentName)}의 응답</h3>
+          <div class="response-card-head">
+            <h3>${escapeHTML(r.respondentName)}의 응답</h3>
+            <button type="button" class="danger delete-response-btn" data-response-index="${index}" aria-label="${escapeHTML(r.respondentName)} 응답 삭제">선택 삭제</button>
+          </div>
           <p class="small">${escapeHTML(r.respondentName)}이/가 ${escapeHTML(r.targetName)}을/를 잘 나타낸다고 선택한 형용사</p>
           <div class="pill-list">
             ${r.picks.map(idx => `<span class="pill">${adjectiveStackHTML(idx)}</span>`).join("")}
           </div>
         </article>
       `).join("");
+    }
+
+    function deleteResponseAt(index) {
+      if (!Number.isInteger(index) || index < 0 || index >= responses.length) return;
+      const response = responses[index];
+      const name = response.respondentName || "이름 없음";
+      if (!confirm(`${name}의 응답을 삭제할까요?`)) return;
+      responses.splice(index, 1);
+      saveResponses();
+      renderResults();
     }
 
     function renderQuadrantCard(key, data) {
@@ -1394,6 +1460,7 @@
     function renderResults() {
       loadResponses();
       $("#respondentBadge").textContent = `타인 응답 ${responses.length}명`;
+      renderSelfResponseTop();
       renderResponseList();
 
       if (selfPicks.length !== MAX_PICKS) {
@@ -1408,11 +1475,8 @@
         $("#resultStateMsg").className = "notice warn";
         $("#resultStateMsg").textContent = "본인 선택은 완료되었습니다. 타인 응답 데이터를 가져오면 결과가 채워집니다.";
       } else {
-        const targets = [...new Set(responses.map(r => r.targetName))].filter(Boolean);
-        $("#resultStateMsg").className = targets.length > 1 ? "notice warn" : "notice ok";
-        $("#resultStateMsg").textContent = targets.length > 1
-          ? `타인 응답 ${responses.length}명을 가져왔습니다. 평가 대상 이름이 여러 개입니다: ${targets.join(", ")}`
-          : `본인 선택 6개와 ${targets[0] || "대상 미입력"}에 대한 타인 응답 ${responses.length}명을 기준으로 계산했습니다.`;
+        $("#resultStateMsg").className = "notice ok";
+        $("#resultStateMsg").textContent = `본인 선택 6개와 타인 응답 ${responses.length}명을 기준으로 계산했습니다.`;
       }
 
       const windows = computeQuadrants();
@@ -1501,6 +1565,12 @@
         setActiveTab("result");
         const failText = result.failed.length ? ` 실패 ${result.failed.length}건: ${[...new Set(result.failed)].join(", ")}` : "";
         $("#importMsg").textContent = `가져온 응답 ${result.ok}건.${failText}`;
+      });
+
+      $("#responseList").addEventListener("click", (e) => {
+        const deleteBtn = e.target.closest(".delete-response-btn");
+        if (!deleteBtn) return;
+        deleteResponseAt(Number(deleteBtn.dataset.responseIndex));
       });
 
       $("#clearRespondentsBtn").addEventListener("click", () => {
