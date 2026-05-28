@@ -62,6 +62,18 @@
       font-size: 16px;
     }
 
+    .source-note {
+      margin: 10px 0 0;
+      max-width: 860px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .source-note a {
+      color: var(--primary-dark);
+      font-weight: 700;
+    }
+
     main {
       padding-bottom: 52px;
     }
@@ -907,6 +919,7 @@
     </div>
     <h1>조하리의 창(Johari's Window)</h1>
     <p class="subtitle">본인이 고른 6개 형용사와 타인이 고른 6개 형용사를 비교해 열린 창, 보이지 않는 창, 숨겨진 창, 미지의 창을 자동으로 정리합니다.</p>
+    <p class="source-note">이 도구는 Joseph Luft와 Harrington Ingham이 1955년에 제안한 Johari Window 모델을 바탕으로 합니다. Johari는 두 연구자의 이름을 결합한 명칭이며, 네 영역은 자기와 타인이 알고 있거나 모르는 특성을 비교합니다. <a href="https://en.wikipedia.org/wiki/Johari_window" target="_blank" rel="noopener noreferrer">Wikipedia 요약 보기</a></p>
   </header>
 
   <main class="wrap">
@@ -1114,6 +1127,8 @@
       ko: {
         pageTitle: "조하리의 창(Johari's Window)",
         subtitle: "본인이 고른 6개 형용사와 타인이 고른 6개 형용사를 비교해 열린 창, 보이지 않는 창, 숨겨진 창, 미지의 창을 자동으로 정리합니다.",
+        sourceNote: "이 도구는 Joseph Luft와 Harrington Ingham이 1955년에 제안한 Johari Window 모델을 바탕으로 합니다. Johari는 두 연구자의 이름을 결합한 명칭이며, 네 영역은 자기와 타인이 알고 있거나 모르는 특성을 비교합니다.",
+        sourceLinkLabel: "Wikipedia 요약 보기",
         tabSelf: "1. 본인 선택",
         tabPeer: "2. 타인 선택",
         tabResult: "3. 결과 보기",
@@ -1200,7 +1215,7 @@
         tableWindowType: "창 / 연결 유형",
         tableWindowSize: "창 크기<br><span class=\"small\">형용사 수</span>",
         tableSelectionSum: "선택 합산",
-        typeSummaryNote: "유형 판정은 실제 형용사 수와 기대 형용사 수의 완화 비율((실제+0.5)/(기대+0.5))로 산출합니다. 표와 막대는 해석을 돕기 위한 실제 관측값입니다.",
+        typeSummaryNote: "유형 판정은 열린 창·보이지 않는 창·숨겨진 창은 선택 합산의 기대 대비 완화 비율로, 미지의 창은 선택되지 않은 형용사 수의 기대 대비 완화 비율로 산출합니다: (실제+0.5)/(기대+0.5).",
         typeExplanationTitle: "네 가지 유형 설명",
         typeOpenDesc: "나와 타인이 함께 인식하는 특성이 많은 유형입니다. 자기표현과 피드백 수용이 비교적 균형을 이루며, 관계에서 투명성과 친밀감이 높게 나타날 수 있습니다.",
         typeBlindDesc: "타인은 알아보지만 나는 덜 인식하는 특성이 많은 유형입니다. 솔직하고 표현력이 있어 보일 수 있으나, 타인의 피드백을 통해 자기인식을 보완하는 과정이 중요합니다.",
@@ -1250,6 +1265,8 @@
       en: {
         pageTitle: "Johari Window",
         subtitle: "Compare the 6 adjectives you select with the 6 adjectives selected by others, then automatically organize the Open, Blind, Hidden, and Unknown areas.",
+        sourceNote: "This tool is based on the Johari Window model proposed by Joseph Luft and Harrington Ingham in 1955. The name Johari combines the two researchers’ names, and the four areas compare traits known or unknown to oneself and to others.",
+        sourceLinkLabel: "View Wikipedia summary",
         tabSelf: "1. Self Selection",
         tabPeer: "2. Peer Selection",
         tabResult: "3. View Results",
@@ -1336,7 +1353,7 @@
         tableWindowType: "Area / linked type",
         tableWindowSize: "Area size<br><span class=\"small\">adjective count</span>",
         tableSelectionSum: "Selection total",
-        typeSummaryNote: "The type classification uses a smoothed ratio of observed to expected adjective counts: (observed + 0.5) / (expected + 0.5). The table and bars show the observed values for interpretation.",
+        typeSummaryNote: "The type classification uses a smoothed observed-to-expected ratio for selection totals in the Open, Blind, and Hidden areas, while the Unknown area uses the count of unselected adjectives: (observed + 0.5) / (expected + 0.5).",
         typeExplanationTitle: "Four type descriptions",
         typeOpenDesc: "A type with many traits recognized by both self and others. Self-expression and receptiveness to feedback are relatively balanced, and relationships may show transparency and closeness.",
         typeBlindDesc: "A type with many traits others notice but the self recognizes less. The person may appear direct and expressive, while feedback from others is important for improving self-awareness.",
@@ -1536,6 +1553,10 @@
 
       setText("header h1", t("pageTitle"));
       setText(".subtitle", t("subtitle"));
+      const sourceNote = $(".source-note");
+      if (sourceNote) {
+        sourceNote.innerHTML = `${escapeHTML(t("sourceNote"))} <a href="https://en.wikipedia.org/wiki/Johari_window" target="_blank" rel="noopener noreferrer">${escapeHTML(t("sourceLinkLabel"))}</a>`;
+      }
 
       const tabs = { self: t("tabSelf"), peer: t("tabPeer"), result: t("tabResult") };
       Object.entries(tabs).forEach(([key, label]) => {
@@ -1809,12 +1830,23 @@
       }
 
       const respondentCount = responses.length;
-      const q = 1 - Math.pow((ADJECTIVES.length - MAX_PICKS) / ADJECTIVES.length, respondentCount);
+      const adjectiveTotal = ADJECTIVES.length;
+      const pickCount = MAX_PICKS;
+      const p = pickCount / adjectiveTotal;
+      const q = 1 - Math.pow(1 - p, respondentCount);
+
       const expectedByKey = {
-        open: MAX_PICKS * q,
-        hidden: MAX_PICKS * (1 - q),
-        blind: (ADJECTIVES.length - MAX_PICKS) * q,
-        unknown: (ADJECTIVES.length - MAX_PICKS) * (1 - q)
+        open: pickCount * q + respondentCount * pickCount * p,
+        hidden: pickCount * (1 - q),
+        blind: respondentCount * pickCount * (1 - p),
+        unknown: (adjectiveTotal - pickCount) * (1 - q)
+      };
+
+      const observedByKey = {
+        open: windows.open.selectionSum,
+        hidden: windows.hidden.selectionSum,
+        blind: windows.blind.selectionSum,
+        unknown: windows.unknown.adjectiveCount
       };
 
       const entries = Object.entries(windows).map(([key, w]) => ({
@@ -1822,7 +1854,9 @@
         title: getWindowTitle(key),
         adjectiveCount: w.adjectiveCount,
         selectionSum: w.selectionSum,
-        ratioScore: (w.adjectiveCount + 0.5) / (expectedByKey[key] + 0.5)
+        observedForType: observedByKey[key],
+        expectedForType: expectedByKey[key],
+        ratioScore: (observedByKey[key] + 0.5) / (expectedByKey[key] + 0.5)
       })).sort((a, b) =>
         (b.ratioScore - a.ratioScore) ||
         (b.selectionSum - a.selectionSum) ||
