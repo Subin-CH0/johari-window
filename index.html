@@ -648,6 +648,66 @@
       background: linear-gradient(180deg, #fffaf4 0%, #ffffff 100%);
     }
 
+    .export-toolbar {
+      justify-content: flex-end;
+      margin: 18px 0 0;
+    }
+
+    .export-sheet {
+      position: fixed;
+      left: -99999px;
+      top: 0;
+      width: 1080px;
+      max-width: none;
+      background: #fff8ef;
+      color: var(--text);
+      box-shadow: none;
+      z-index: -1;
+    }
+
+    .export-sheet .export-header {
+      margin-bottom: 18px;
+      text-align: left;
+    }
+
+    .export-sheet .export-title {
+      margin: 0 0 8px;
+      font-size: 34px;
+      letter-spacing: -0.04em;
+      line-height: 1.15;
+    }
+
+    .export-sheet .export-subtitle {
+      margin: 0 0 4px;
+      font-size: 20px;
+      letter-spacing: -0.025em;
+      line-height: 1.25;
+    }
+
+    .export-sheet .summary-card,
+    .export-sheet .response-card,
+    .export-sheet .quadrant {
+      box-shadow: none;
+    }
+
+    .export-sheet .result-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .export-sheet .guide-grid {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+
+    .export-sheet .overlap-grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .export-sheet button,
+    .export-sheet textarea,
+    .export-sheet [data-export-ignore] {
+      display: none !important;
+    }
+
     .comparison-table {
       width: 100%;
       border-collapse: collapse;
@@ -1043,6 +1103,10 @@
       <div id="quadrants" class="result-grid"></div>
       <div id="typeSummary" class="summary-card bottom-summary" style="display:none;"></div>
       <div id="overlapSummary" class="summary-card bottom-summary" style="display:none;"></div>
+
+      <div class="toolbar export-toolbar" data-export-ignore>
+        <button id="exportImageBtn" type="button" class="secondary">이미지로 저장</button>
+      </div>
     </section>
 
     <footer>
@@ -1062,6 +1126,8 @@
       </div>
     </footer>
   </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 
   <script>
     const ADJECTIVES = [
@@ -1177,6 +1243,10 @@
         importPlaceholder: "여기에 타인이 복사해 보낸 응답 데이터를 붙여 넣으세요. 여러 개를 한꺼번에 붙여 넣어도 됩니다.",
         importBtn: "응답 가져오기",
         clearRespondents: "타인 응답 전체 삭제",
+        exportImage: "이미지로 저장",
+        exportImageBusy: "이미지 생성 중...",
+        exportLibraryMissing: "이미지 저장 라이브러리를 불러오지 못했습니다. 인터넷 연결을 확인하거나 html2canvas 파일을 로컬로 포함하세요.",
+        exportImageError: "이미지 저장 중 오류가 발생했습니다.",
         importedResponsesTitle: "가져온 응답",
         resultPrepareMsg: "본인 선택과 타인 응답을 준비하세요.",
         selfResponseTitle: "본인 응답",
@@ -1315,6 +1385,10 @@
         importPlaceholder: "Paste the response data copied and sent by others here. You can paste multiple responses at once.",
         importBtn: "Import responses",
         clearRespondents: "Delete all peer responses",
+        exportImage: "Save as image",
+        exportImageBusy: "Creating image...",
+        exportLibraryMissing: "The image export library could not be loaded. Check your internet connection or include html2canvas locally.",
+        exportImageError: "An error occurred while saving the image.",
         importedResponsesTitle: "Imported responses",
         resultPrepareMsg: "Prepare your self selection and peer responses.",
         selfResponseTitle: "Self response",
@@ -1616,6 +1690,7 @@
       setAttr("#importBox", "placeholder", t("importPlaceholder"));
       setText("#importBtn", t("importBtn"));
       setText("#clearRespondentsBtn", t("clearRespondents"));
+      setText("#exportImageBtn", t("exportImage"));
       const importedColumn = $("#resultStateMsg")?.closest("div");
       if (importedColumn) {
         const h3 = importedColumn.querySelector("h3");
@@ -2204,6 +2279,83 @@
       if (activeTab === "result") renderResults();
     }
 
+
+    async function exportResultAsImage() {
+      if (typeof html2canvas === "undefined") {
+        alert(t("exportLibraryMissing"));
+        return;
+      }
+
+      if (selfPicks.length !== MAX_PICKS) {
+        alert(t("resultNeedSelf"));
+        return;
+      }
+
+      const btn = $("#exportImageBtn");
+      if (btn) {
+        btn.disabled = true;
+        btn.textContent = t("exportImageBusy");
+      }
+
+      let sheet = null;
+      try {
+        setActiveTab("result");
+        renderResults();
+
+        await new Promise(resolve => requestAnimationFrame(resolve));
+        if (document.fonts && document.fonts.ready) {
+          await document.fonts.ready;
+        }
+
+        sheet = document.createElement("div");
+        sheet.className = "export-sheet card";
+
+        const stateText = $("#resultStateMsg")?.textContent || "";
+        sheet.innerHTML = `
+          <div class="export-header">
+            <h1 class="export-title">${escapeHTML(t("pageTitle"))}</h1>
+            <h2 class="export-subtitle">${escapeHTML(t("resultTitle"))}</h2>
+            <p class="small">${escapeHTML(stateText)}</p>
+          </div>
+        `;
+
+        ["#selfResponseTop", "#quadrants", "#typeSummary", "#overlapSummary"].forEach(selector => {
+          const el = $(selector);
+          if (!el) return;
+          if (!el.innerHTML.trim()) return;
+          if (getComputedStyle(el).display === "none") return;
+          sheet.appendChild(el.cloneNode(true));
+        });
+
+        document.body.appendChild(sheet);
+
+        const canvas = await html2canvas(sheet, {
+          backgroundColor: "#fff8ef",
+          scale: Math.min(window.devicePixelRatio || 2, 3),
+          useCORS: true
+        });
+
+        const rawName = getSelfName() || "johari";
+        const safeName = rawName
+          .replace(/[\\/:*?"<>|]+/g, "_")
+          .trim() || "johari";
+
+        const link = document.createElement("a");
+        link.download = `johari-window-${safeName}-${new Date().toISOString().slice(0, 10)}.png`;
+        link.href = canvas.toDataURL("image/png");
+        link.click();
+      } catch (e) {
+        console.error(e);
+        alert(t("exportImageError"));
+      } finally {
+        if (sheet) sheet.remove();
+        if (btn) {
+          btn.disabled = false;
+          btn.textContent = t("exportImage");
+        }
+      }
+    }
+
     function bindControls() {
       $$(".tab-btn").forEach(btn => btn.addEventListener("click", () => setActiveTab(btn.dataset.tab)));
       $$(".lang-btn").forEach(btn => btn.addEventListener("click", () => setLanguage(btn.dataset.lang)));
@@ -2257,6 +2409,7 @@
       });
 
       $("#copyResponseBtn").addEventListener("click", () => copyToClipboard($("#responseData").value));
+      $("#exportImageBtn").addEventListener("click", exportResultAsImage);
 
       $("#importBtn").addEventListener("click", () => {
         loadResponses();
