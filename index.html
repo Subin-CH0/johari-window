@@ -571,6 +571,68 @@
       margin-bottom: 6px;
     }
 
+    .response-card.excluded {
+      opacity: 0.62;
+      background: #fffdf9;
+    }
+
+
+    .response-list-toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin: 0 0 12px;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: #fffdf9;
+    }
+
+    .response-list-toolbar-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .response-card-head-main {
+      display: grid;
+      gap: 8px;
+      min-width: 0;
+    }
+
+    .response-include-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--text);
+      font-size: 13px;
+      font-weight: 900;
+      cursor: pointer;
+    }
+
+    .response-include-label input {
+      width: 18px;
+      height: 18px;
+      accent-color: var(--primary);
+    }
+
+    .response-card-controls {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 6px;
+    }
+
+    .response-move-btn {
+      flex: 0 0 auto;
+      padding: 7px 10px;
+      border-radius: 999px;
+      font-size: 13px;
+    }
+
     .response-card-head {
       display: flex;
       justify-content: space-between;
@@ -1037,6 +1099,39 @@
         font-weight: 900;
         line-height: 1;
       }
+
+      .response-list-toolbar {
+        align-items: stretch;
+      }
+
+      .response-list-toolbar-actions {
+        width: 100%;
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .response-list-toolbar-actions button {
+        width: 100%;
+      }
+
+      .response-card-head {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .response-card-controls {
+        width: 100%;
+        justify-content: flex-start;
+      }
+
+      .response-card-controls .response-move-btn {
+        flex: 1 1 0;
+        width: auto;
+      }
+
+      .response-card-controls .delete-response-btn {
+        flex: 0 0 34px;
+      }
       
       .pill {
         border-radius: 14px;
@@ -1201,7 +1296,7 @@
           <div id="importMsg" class="small"></div>
         </div>
         <div>
-          <details id="importedResponsesDetails" class="response-collapsible">
+          <details id="importedResponsesDetails" class="response-collapsible" open>
             <summary>
               <h3 id="importedResponsesTitle">가져온 응답 (0개)</h3>
             </summary>
@@ -1354,7 +1449,7 @@
         responseLoadedForEdit: "선택한 응답을 위쪽 입력 영역에 다시 불러왔습니다. 수정 후 응답 데이터 만들기를 다시 누르세요.",
         resultTitle: "결과 보기",
         resultHint: "타인이 보내준 응답 데이터를 붙여 넣으면, 각 사람이 누구에 대해 어떤 형용사를 골랐는지 모아보고 결과를 계산할 수 있습니다.",
-        respondentBadge: "타인 응답 {count}명",
+        respondentBadge: "계산 포함 {selected}명 / 전체 {total}명",
         guideLabel: "조하리의 창 네 영역 설명",
         openTitle: "열린 창",
         openGuide: "나도 알고 타인도 아는 특성입니다. 자기인식과 타인의 인식이 만나는 영역입니다.",
@@ -1374,6 +1469,16 @@
         exportImageError: "이미지 저장 중 오류가 발생했습니다.",
         importedResponsesTitle: "가져온 응답",
         importedResponsesTitleWithCount: "가져온 응답 ({count}개)",
+        importedResponsesSelectionSummary: "계산 포함 {selected}개 / 전체 {total}개",
+        includeResponse: "결과 계산에 포함",
+        excludeResponse: "결과 계산에서 제외",
+        selectAllResponses: "전체 선택",
+        deselectAllResponses: "전체 해제",
+        moveResponseUp: "위로",
+        moveResponseDown: "아래로",
+        dragResponseHint: "위/아래 버튼으로 카드 순서를 바꿀 수 있습니다.",
+        noSelectedResponses: "체크된 타인 응답이 없습니다. 가져온 응답에서 계산에 포함할 응답을 선택하세요.",
+        selectedResponseCount: "선택 {selected} / 전체 {total}",
         resultPrepareMsg: "본인 선택과 타인 응답을 준비하세요.",
         selfResponseTitle: "본인 응답",
         selfResponseComplete: "{name}이/가 본인을 잘 나타낸다고 선택한 형용사 6개입니다.",
@@ -1510,7 +1615,7 @@
         responseLoadedForEdit: "The selected response has been loaded back into the editing area above. After editing, click Create response data again.",
         resultTitle: "View Results",
         resultHint: "Paste response data sent by others to collect who selected which adjectives about whom and calculate the results.",
-        respondentBadge: "Peer responses: {count}",
+        respondentBadge: "Included: {selected} / {total}",
         guideLabel: "Four Johari Window area descriptions",
         openTitle: "Open Area",
         openGuide: "Traits known by both you and others. This area is where self-awareness and others’ perceptions meet.",
@@ -1530,6 +1635,16 @@
         exportImageError: "An error occurred while saving the image.",
         importedResponsesTitle: "Imported responses",
         importedResponsesTitleWithCount: "Imported responses ({count})",
+        importedResponsesSelectionSummary: "Included in calculation: {selected} / {total}",
+        includeResponse: "Include in results",
+        excludeResponse: "Exclude from results",
+        selectAllResponses: "Select all",
+        deselectAllResponses: "Deselect all",
+        moveResponseUp: "Up",
+        moveResponseDown: "Down",
+        dragResponseHint: "Use the up/down buttons to reorder cards.",
+        noSelectedResponses: "No peer responses are checked. Select imported responses to include in the calculation.",
+        selectedResponseCount: "Selected {selected} / {total}",
         resultPrepareMsg: "Prepare your self selection and peer responses.",
         selfResponseTitle: "Self response",
         selfResponseComplete: "{name} selected these 6 adjectives as self-descriptive.",
@@ -1730,6 +1845,7 @@
             respondentName: String(r.respondentName || ""),
             targetName: String(r.targetName || ""),
             picks: normalizePicks(r.picks),
+            included: r.included !== false,
             createdAt: r.createdAt || new Date().toISOString()
           }))
           .filter(r => r.picks.length === MAX_PICKS);
@@ -2102,7 +2218,7 @@
             failed.push(t("importDuplicate"));
             return;
           }
-          responses.push(response);
+          responses.push({ ...response, included: true });
           ok += 1;
         } catch (e) {
           failed.push(e.message || t("importFail"));
@@ -2112,9 +2228,45 @@
       return { ok, failed };
     }
 
+    function responseIsIncluded(response) {
+      return response && response.included !== false;
+    }
+
+    function getIncludedResponses() {
+      return responses.filter(responseIsIncluded);
+    }
+
+    function getIncludedResponseCount() {
+      return getIncludedResponses().length;
+    }
+
+    function toggleResponseIncluded(index, included) {
+      if (!Number.isInteger(index) || index < 0 || index >= responses.length) return;
+      responses[index].included = Boolean(included);
+      saveResponses();
+      renderResults();
+    }
+
+    function setAllResponsesIncluded(included) {
+      responses = responses.map(response => ({ ...response, included: Boolean(included) }));
+      saveResponses();
+      renderResults();
+    }
+
+    function moveResponse(index, direction) {
+      const nextIndex = index + direction;
+      if (!Number.isInteger(index) || index < 0 || index >= responses.length) return;
+      if (nextIndex < 0 || nextIndex >= responses.length) return;
+      const [item] = responses.splice(index, 1);
+      responses.splice(nextIndex, 0, item);
+      saveResponses();
+      renderResults();
+    }
+
+
     function getPeerCounts() {
       const counts = Array(ADJECTIVES.length).fill(0);
-      responses.forEach(r => {
+      getIncludedResponses().forEach(r => {
         r.picks.forEach(idx => counts[idx] += 1);
       });
       return counts;
@@ -2157,11 +2309,12 @@
     }
 
     function getTypeLabel(windows) {
-      if (responses.length === 0) {
+      const includedResponses = getIncludedResponses();
+      if (includedResponses.length === 0) {
         return { label: t("typeWaitingLabel"), text: t("typeWaitingText"), top: null, entries: [] };
       }
 
-      const respondentCount = responses.length;
+      const respondentCount = includedResponses.length;
       const adjectiveTotal = ADJECTIVES.length;
       const pickCount = MAX_PICKS;
       const p = pickCount / adjectiveTotal;
@@ -2229,20 +2382,51 @@
       setText("#importedResponsesTitle", t("importedResponsesTitleWithCount", { count: responses.length }));
     }
 
+    function openImportedResponsesPanel() {
+      const details = $("#importedResponsesDetails");
+      if (details && responses.length) details.open = true;
+    }
+
     function renderResponseList() {
       updateImportedResponsesTitle();
       if (!responses.length) {
         $("#responseList").innerHTML = `<p class="empty">${escapeHTML(t("noResponses"))}</p>`;
         return;
       }
-      $("#responseList").innerHTML = responses.map((r, index) => {
+      const selectedCount = getIncludedResponseCount();
+      const toolbarHTML = `
+        <div class="response-list-toolbar" data-export-ignore>
+          <div>
+            <strong>${escapeHTML(t("importedResponsesSelectionSummary", { selected: selectedCount, total: responses.length }))}</strong>
+            <p class="small" style="margin:4px 0 0;">${escapeHTML(t("dragResponseHint"))}</p>
+          </div>
+          <div class="response-list-toolbar-actions">
+            <button type="button" class="plain" data-response-select-all="true">${escapeHTML(t("selectAllResponses"))}</button>
+            <button type="button" class="plain" data-response-select-all="false">${escapeHTML(t("deselectAllResponses"))}</button>
+          </div>
+        </div>
+      `;
+      const cardsHTML = responses.map((r, index) => {
         const respondent = displayName(r.respondentName, "noName");
         const target = displayName(r.targetName, "noTarget");
+        const included = responseIsIncluded(r);
+        const upDisabled = index === 0 ? " disabled" : "";
+        const downDisabled = index === responses.length - 1 ? " disabled" : "";
         return `
-          <article class="response-card">
+          <article class="response-card${included ? "" : " excluded"}" data-response-index="${index}">
             <div class="response-card-head">
-              <h3>${escapeHTML(t("responseCardTitle", { name: respondent }))}</h3>
-              <button type="button" class="danger delete-response-btn" data-response-index="${index}" aria-label="${escapeHTML(t("responseDeleteAria", { name: respondent }))}">${escapeHTML(t("responseDeleteButton"))}</button>
+              <div class="response-card-head-main">
+                <label class="response-include-label">
+                  <input type="checkbox" data-response-toggle="${index}" ${included ? "checked" : ""} />
+                  <span>${escapeHTML(included ? t("includeResponse") : t("excludeResponse"))}</span>
+                </label>
+                <h3>${escapeHTML(`${index + 1}. ${t("responseCardTitle", { name: respondent })}`)}</h3>
+              </div>
+              <div class="response-card-controls" data-export-ignore>
+                <button type="button" class="plain response-move-btn" data-response-index="${index}" data-response-move="-1"${upDisabled}>${escapeHTML(t("moveResponseUp"))}</button>
+                <button type="button" class="plain response-move-btn" data-response-index="${index}" data-response-move="1"${downDisabled}>${escapeHTML(t("moveResponseDown"))}</button>
+                <button type="button" class="danger delete-response-btn" data-response-index="${index}" aria-label="${escapeHTML(t("responseDeleteAria", { name: respondent }))}">${escapeHTML(t("responseDeleteButton"))}</button>
+              </div>
             </div>
             <p class="small">${escapeHTML(t("responseDescription", { respondent, target }))}</p>
             <div class="pill-list">
@@ -2251,6 +2435,7 @@
           </article>
         `;
       }).join("");
+      $("#responseList").innerHTML = toolbarHTML + cardsHTML;
     }
 
     function deleteResponseAt(index) {
@@ -2323,7 +2508,7 @@
     function makeParticipants() {
       const selfName = getSelfName().trim() || t("selfNameMissing");
       const self = { id: "self", kind: "self", name: selfName, picks: normalizePicks(selfPicks) };
-      const peers = responses.map((r, index) => ({
+      const peers = getIncludedResponses().map((r, index) => ({
         id: r.id || `peer-${index}`,
         kind: "peer",
         name: displayName(r.respondentName, "noName"),
@@ -2489,7 +2674,8 @@
 
     function renderResults() {
       loadResponses();
-      $("#respondentBadge").textContent = t("respondentBadge", { count: responses.length });
+      const includedResponses = getIncludedResponses();
+      $("#respondentBadge").textContent = t("respondentBadge", { selected: includedResponses.length, total: responses.length, count: includedResponses.length });
       updateImportedResponsesTitle();
       renderSelfResponseTop();
       renderResponseList();
@@ -2501,7 +2687,19 @@
           overlapSummary.style.display = "none";
           overlapSummary.innerHTML = "";
         }
-        $("#quadrants").innerHTML = "";
+        $("#quadrants").innerHTML = `<div class="notice warn" style="grid-column:1 / -1;">${escapeHTML(t("resultNeedSelf"))}</div>`;
+        return;
+      }
+
+      if (!includedResponses.length) {
+        $("#typeSummary").style.display = "none";
+        const overlapSummary = $("#overlapSummary");
+        if (overlapSummary) {
+          overlapSummary.style.display = "none";
+          overlapSummary.innerHTML = "";
+        }
+        const message = responses.length ? t("noSelectedResponses") : t("resultNeedPeer");
+        $("#quadrants").innerHTML = `<div class="notice warn" style="grid-column:1 / -1;">${escapeHTML(message)}</div>`;
         return;
       }
 
@@ -2725,17 +2923,35 @@
         const result = importResponses($("#importBox").value);
         renderAll();
         setActiveTab("result");
+        if (result.ok > 0) openImportedResponsesPanel();
         const failText = result.failed.length
           ? t("importFailedSuffix", { count: result.failed.length, messages: [...new Set(result.failed)].join(", ") })
           : "";
         $("#importMsg").textContent = `${t("importResult", { ok: result.ok })}${failText}`;
       });
 
+      $("#responseList").addEventListener("change", (e) => {
+        const checkbox = e.target.closest("[data-response-toggle]");
+        if (!checkbox) return;
+        toggleResponseIncluded(Number(checkbox.dataset.responseToggle), checkbox.checked);
+      });
+
       $("#responseList").addEventListener("click", (e) => {
+        const selectAllBtn = e.target.closest("[data-response-select-all]");
+        if (selectAllBtn) {
+          setAllResponsesIncluded(selectAllBtn.dataset.responseSelectAll === "true");
+          return;
+        }
+        const moveBtn = e.target.closest("[data-response-move]");
+        if (moveBtn) {
+          moveResponse(Number(moveBtn.dataset.responseIndex), Number(moveBtn.dataset.responseMove));
+          return;
+        }
         const deleteBtn = e.target.closest(".delete-response-btn");
         if (!deleteBtn) return;
         deleteResponseAt(Number(deleteBtn.dataset.responseIndex));
       });
+
 
       $("#clearRespondentsBtn").addEventListener("click", () => {
         if (!confirm(t("confirmClearResponses"))) return;
