@@ -596,6 +596,127 @@
       gap: 8px;
     }
 
+    .response-group-add-panel {
+      margin-top: 12px;
+      padding: 12px;
+      border: 1px dashed var(--line);
+      border-radius: 16px;
+      background: #fffdf9;
+    }
+
+    .response-group-add-panel h4 {
+      margin: 0 0 8px;
+      font-size: 15px;
+      letter-spacing: -0.02em;
+    }
+
+    .response-group-form {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 8px;
+      width: min(100%, 460px);
+      margin-top: 8px;
+    }
+
+    .response-group-form input {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 10px 12px;
+      font: inherit;
+      background: #fff;
+      color: var(--text);
+      outline: none;
+    }
+
+    .response-group-form input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 4px rgba(183, 104, 69, 0.14);
+    }
+
+    .response-group-list {
+      display: grid;
+      gap: 14px;
+    }
+
+    .response-group {
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: #fffdf9;
+      overflow: hidden;
+    }
+
+    .response-group.drag-over {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 4px rgba(183, 104, 69, 0.12);
+    }
+
+    .response-group-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 12px 14px;
+      background: #fff7ef;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .response-group-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-width: 0;
+    }
+
+    .response-group-title h4 {
+      margin: 0;
+      font-size: 16px;
+      letter-spacing: -0.02em;
+    }
+
+    .response-group-actions {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      gap: 6px;
+    }
+
+    .response-group-actions button {
+      padding: 7px 10px;
+      border-radius: 999px;
+      font-size: 13px;
+    }
+
+    .response-group-dropzone {
+      display: grid;
+      gap: 10px;
+      min-height: 80px;
+      padding: 12px;
+    }
+
+    .response-group-dropzone.is-drag-target {
+      background: var(--primary-soft);
+    }
+
+    .response-group-empty {
+      border: 1px dashed var(--line);
+      border-radius: 16px;
+      padding: 14px;
+      color: var(--muted);
+      font-size: 14px;
+      text-align: center;
+      background: #fff;
+    }
+
+    .response-card[draggable="true"] {
+      cursor: grab;
+    }
+
+    .response-card.dragging {
+      opacity: 0.46;
+      cursor: grabbing;
+    }
+
     .response-card-head-main {
       display: grid;
       gap: 8px;
@@ -616,6 +737,29 @@
       width: 18px;
       height: 18px;
       accent-color: var(--primary);
+    }
+
+    .response-group-include-label {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0;
+      border: 0;
+      background: transparent;
+      color: var(--text);
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .response-group-include-label input {
+      width: 17px;
+      height: 17px;
+      accent-color: var(--primary);
+    }
+
+    .response-group-include-label:has(input:disabled) {
+      opacity: 0.48;
+      cursor: not-allowed;
     }
 
     .response-card-controls {
@@ -1114,6 +1258,24 @@
         width: 100%;
       }
 
+      .response-group-form {
+        width: 100%;
+        grid-template-columns: 1fr;
+      }
+
+      .response-group-head {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .response-group-actions {
+        justify-content: flex-start;
+      }
+
+      .response-group-actions button {
+        width: auto;
+      }
+
       .response-card-head {
         flex-direction: column;
         align-items: stretch;
@@ -1325,6 +1487,7 @@
             Proceedings of the Western Training Laboratory in Group Development, UCLA.</li>
           <li>Luft, J. (1961). <em>The Johari Window: A Graphic Model of Awareness in Interpersonal Relations</em>.
             Human Relations Training News.</li>
+          <li>Hanson, P.G. (1973). <em>The Johari window: A model for soliciting and giving feedback</em>. In J.W. Pfeiffer &amp; J. E. Jones (Eds.), <em>The 1973 annual handbook for group facilitators</em>. San Diego, CA: University Associates.</li>
           <li>Newstrom, J. W., &amp; Rubenfeld, S. A. (1983). <em>The Johari Window: A Reconceptualization</em>.
             Developments in Business Simulation and Experiential Learning.</li>
           <li>형용사 56개 목록과 네 영역 분류 방식은 공개 조하리의 창 활동지 및 설명 자료를 참고했습니다. 예: Parity Planner Johari Window worksheet,
@@ -1476,7 +1639,24 @@
         deselectAllResponses: "전체 해제",
         moveResponseUp: "위로",
         moveResponseDown: "아래로",
-        dragResponseHint: "위/아래 버튼으로 카드 순서를 바꿀 수 있습니다.",
+        dragResponseHint: "위/아래 버튼으로 같은 그룹 안의 카드 순서를 바꾸고, 카드는 다른 그룹으로 드래그해 옮길 수 있습니다. 그룹 추가는 카드 목록 아래에서 할 수 있습니다.",
+        defaultResponseGroupName: "기본",
+        responseGroupInputPlaceholder: "새 그룹 이름 예: 가족, 친구, 동료",
+        addResponseGroup: "그룹 추가",
+        addResponseGroupTitle: "새 그룹 만들기",
+        selectGroupResponses: "그룹 전체 선택",
+        deselectGroupResponses: "그룹 전체 해제",
+        groupIncludeToggle: "그룹 포함",
+        responseGroupCount: "{count}개",
+        responseGroupEmpty: "이 그룹에는 아직 응답 카드가 없습니다. 다른 그룹의 카드를 이곳으로 드래그해 옮길 수 있습니다.",
+        renameResponseGroup: "이름 변경",
+        deleteResponseGroup: "그룹 삭제",
+        responseGroupNamePrompt: "새 그룹 이름을 입력하세요.",
+        responseGroupRenamePrompt: "변경할 그룹 이름을 입력하세요.",
+        responseGroupNameEmpty: "그룹 이름을 입력해 주세요.",
+        responseGroupDuplicate: "이미 있는 그룹 이름입니다.",
+        responseGroupDeleteConfirm: "{group} 그룹이 삭제되고, 이 그룹의 응답은 기본 그룹으로 이동합니다.",
+        responseGroupDefaultNotice: "",
         noSelectedResponses: "체크된 타인 응답이 없습니다. 가져온 응답에서 계산에 포함할 응답을 선택하세요.",
         selectedResponseCount: "선택 {selected} / 전체 {total}",
         resultPrepareMsg: "본인 선택과 타인 응답을 준비하세요.",
@@ -1642,7 +1822,24 @@
         deselectAllResponses: "Deselect all",
         moveResponseUp: "Up",
         moveResponseDown: "Down",
-        dragResponseHint: "Use the up/down buttons to reorder cards.",
+        dragResponseHint: "Use the up/down buttons to reorder cards within a group, and drag cards to move them between groups. Add new groups at the bottom of the card list.",
+        defaultResponseGroupName: "Default",
+        responseGroupInputPlaceholder: "New group name, e.g., Family, Friends, Team",
+        addResponseGroup: "Add group",
+        addResponseGroupTitle: "Create a new group",
+        selectGroupResponses: "Select group",
+        deselectGroupResponses: "Deselect group",
+        groupIncludeToggle: "Include group",
+        responseGroupCount: "{count}",
+        responseGroupEmpty: "No response cards in this group yet. Drag cards from another group into this area.",
+        renameResponseGroup: "Rename",
+        deleteResponseGroup: "Delete group",
+        responseGroupNamePrompt: "Enter a new group name.",
+        responseGroupRenamePrompt: "Enter the new group name.",
+        responseGroupNameEmpty: "Please enter a group name.",
+        responseGroupDuplicate: "A group with this name already exists.",
+        responseGroupDeleteConfirm: "The {group} group will be deleted and its responses will move to the Default group.",
+        responseGroupDefaultNotice: "",
         noSelectedResponses: "No peer responses are checked. Select imported responses to include in the calculation.",
         selectedResponseCount: "Selected {selected} / {total}",
         resultPrepareMsg: "Prepare your self selection and peer responses.",
@@ -1735,13 +1932,17 @@
     const STORAGE_SELF = "johari:self:v3";
     const STORAGE_SELF_NAME = "johari:selfName:v3";
     const STORAGE_RESPONSES = "johari:responses:v3";
+    const STORAGE_RESPONSE_GROUPS = "johari:responseGroups:v1";
     const STORAGE_CREATED_RESPONSES = "johari:createdResponses:v1";
     const STORAGE_LANG = "johari:lang:v1";
     const RESPONSE_PREFIX = "JOHARI_RESPONSE_V1:";
+    const DEFAULT_RESPONSE_GROUP = "기본";
 
     let selfPicks = [];
     let peerPicks = [];
     let responses = [];
+    let responseGroups = [];
+    let draggedResponseId = null;
     let activeTab = "self";
     let currentLang = localStorage.getItem(STORAGE_LANG) || "ko";
     let peerResponseStatus = "";
@@ -1832,10 +2033,25 @@
     }
 
     function saveResponses() {
+      ensureResponseGroups();
       localStorage.setItem(STORAGE_RESPONSES, JSON.stringify(responses));
+      localStorage.setItem(STORAGE_RESPONSE_GROUPS, JSON.stringify(responseGroups));
+    }
+
+    function loadResponseGroups() {
+      try {
+        const raw = JSON.parse(localStorage.getItem(STORAGE_RESPONSE_GROUPS) || "[]");
+        responseGroups = Array.isArray(raw)
+          ? raw.map(normalizeGroupName).filter(Boolean)
+          : [];
+      } catch (e) {
+        responseGroups = [];
+      }
+      ensureResponseGroups();
     }
 
     function loadResponses() {
+      loadResponseGroups();
       try {
         const raw = JSON.parse(localStorage.getItem(STORAGE_RESPONSES) || "[]");
         responses = raw
@@ -1846,12 +2062,14 @@
             targetName: String(r.targetName || ""),
             picks: normalizePicks(r.picks),
             included: r.included !== false,
+            groupName: normalizeGroupName(r.groupName || r.group || DEFAULT_RESPONSE_GROUP),
             createdAt: r.createdAt || new Date().toISOString()
           }))
           .filter(r => r.picks.length === MAX_PICKS);
       } catch (e) {
         responses = [];
       }
+      ensureResponseGroups();
     }
 
     function saveCreatedResponses() {
@@ -1970,7 +2188,7 @@
       const refStrong = $(".references strong");
       if (refStrong) refStrong.textContent = t("referencesTitle");
       const refItems = $$(".references li");
-      if (refItems[3]) refItems[3].textContent = t("referencesLast");
+      if (refItems[4]) refItems[4].textContent = t("referencesLast");
     }
 
     function togglePick(listName, index) {
@@ -2044,6 +2262,105 @@
 
     function compactName(value) {
       return String(value || "").replace(/[\t\r\n]+/g, " ").replace(/\s+/g, " ").trim();
+    }
+
+    function normalizeGroupName(value) {
+      const name = compactName(value);
+      if (!name || name === "전체") return DEFAULT_RESPONSE_GROUP;
+      return name;
+    }
+
+    function displayGroupName(value) {
+      const name = normalizeGroupName(value);
+      return name === DEFAULT_RESPONSE_GROUP ? t("defaultResponseGroupName") : name;
+    }
+
+    function ensureResponseGroups() {
+      const ordered = [];
+      const add = (name) => {
+        const normalized = normalizeGroupName(name);
+        if (!ordered.includes(normalized)) ordered.push(normalized);
+      };
+      add(DEFAULT_RESPONSE_GROUP);
+      responseGroups.forEach(add);
+      responses.forEach(response => {
+        response.groupName = normalizeGroupName(response.groupName || DEFAULT_RESPONSE_GROUP);
+        add(response.groupName);
+      });
+      responseGroups = ordered;
+    }
+
+    function groupExists(name) {
+      const normalized = normalizeGroupName(name);
+      ensureResponseGroups();
+      return responseGroups.some(group => group === normalized);
+    }
+
+    function addResponseGroup(name) {
+      const normalized = normalizeGroupName(name);
+      if (!compactName(name)) {
+        alert(t("responseGroupNameEmpty"));
+        return false;
+      }
+      ensureResponseGroups();
+      if (groupExists(normalized)) {
+        alert(t("responseGroupDuplicate"));
+        return false;
+      }
+      responseGroups.push(normalized);
+      saveResponses();
+      renderResults();
+      return true;
+    }
+
+    function renameResponseGroup(oldName) {
+      const oldNormalized = normalizeGroupName(oldName);
+      if (oldNormalized === DEFAULT_RESPONSE_GROUP) return;
+      const nextName = prompt(t("responseGroupRenamePrompt"), displayGroupName(oldNormalized));
+      if (nextName === null) return;
+      const nextNormalized = normalizeGroupName(nextName);
+      if (!compactName(nextName)) {
+        alert(t("responseGroupNameEmpty"));
+        return;
+      }
+      ensureResponseGroups();
+      if (nextNormalized !== oldNormalized && responseGroups.includes(nextNormalized)) {
+        alert(t("responseGroupDuplicate"));
+        return;
+      }
+      responseGroups = responseGroups.map(group => group === oldNormalized ? nextNormalized : group);
+      responses.forEach(response => {
+        if (normalizeGroupName(response.groupName) === oldNormalized) response.groupName = nextNormalized;
+      });
+      saveResponses();
+      renderResults();
+    }
+
+    function deleteResponseGroup(groupName) {
+      const normalized = normalizeGroupName(groupName);
+      if (normalized === DEFAULT_RESPONSE_GROUP) return;
+      responses.forEach(response => {
+        if (normalizeGroupName(response.groupName) === normalized) response.groupName = DEFAULT_RESPONSE_GROUP;
+      });
+      responseGroups = responseGroups.filter(group => group !== normalized);
+      saveResponses();
+      renderResults();
+    }
+
+    function moveResponseToGroup(responseId, groupName) {
+      const normalized = normalizeGroupName(groupName);
+      ensureResponseGroups();
+      if (!responseGroups.includes(normalized)) responseGroups.push(normalized);
+      const index = responses.findIndex(response => response.id === responseId);
+      if (index < 0) return;
+      const [item] = responses.splice(index, 1);
+      item.groupName = normalized;
+      const lastIndexInTarget = responses.reduce((last, response, idx) => (
+        normalizeGroupName(response.groupName) === normalized ? idx : last
+      ), -1);
+      responses.splice(lastIndexInTarget + 1, 0, item);
+      saveResponses();
+      renderResults();
     }
 
     function stableHash(value) {
@@ -2218,7 +2535,7 @@
             failed.push(t("importDuplicate"));
             return;
           }
-          responses.push({ ...response, included: true });
+          responses.push({ ...response, included: true, groupName: DEFAULT_RESPONSE_GROUP });
           ok += 1;
         } catch (e) {
           failed.push(e.message || t("importFail"));
@@ -2240,6 +2557,25 @@
       return getIncludedResponses().length;
     }
 
+    function getGroupIncludedState(groupName) {
+      const normalized = normalizeGroupName(groupName);
+      const groupResponses = responses.filter(response => normalizeGroupName(response.groupName) === normalized);
+      const total = groupResponses.length;
+      const included = groupResponses.filter(responseIsIncluded).length;
+      return {
+        total,
+        included,
+        checked: total > 0 && included === total,
+        indeterminate: included > 0 && included < total
+      };
+    }
+
+    function syncGroupIncludeCheckboxes() {
+      $$('[data-response-group-toggle]').forEach(input => {
+        input.indeterminate = input.dataset.indeterminate === "true";
+      });
+    }
+
     function toggleResponseIncluded(index, included) {
       if (!Number.isInteger(index) || index < 0 || index >= responses.length) return;
       responses[index].included = Boolean(included);
@@ -2253,12 +2589,29 @@
       renderResults();
     }
 
+    function setGroupResponsesIncluded(groupName, included) {
+      const normalized = normalizeGroupName(groupName);
+      responses = responses.map(response => (
+        normalizeGroupName(response.groupName) === normalized
+          ? { ...response, included: Boolean(included) }
+          : response
+      ));
+      saveResponses();
+      renderResults();
+    }
+
     function moveResponse(index, direction) {
-      const nextIndex = index + direction;
       if (!Number.isInteger(index) || index < 0 || index >= responses.length) return;
-      if (nextIndex < 0 || nextIndex >= responses.length) return;
+      const currentGroup = normalizeGroupName(responses[index].groupName);
+      const groupIndices = responses
+        .map((response, idx) => ({ response, idx }))
+        .filter(item => normalizeGroupName(item.response.groupName) === currentGroup)
+        .map(item => item.idx);
+      const currentPosition = groupIndices.indexOf(index);
+      const targetIndex = groupIndices[currentPosition + direction];
+      if (targetIndex === undefined) return;
       const [item] = responses.splice(index, 1);
-      responses.splice(nextIndex, 0, item);
+      responses.splice(targetIndex, 0, item);
       saveResponses();
       renderResults();
     }
@@ -2389,6 +2742,7 @@
 
     function renderResponseList() {
       updateImportedResponsesTitle();
+      ensureResponseGroups();
       if (!responses.length) {
         $("#responseList").innerHTML = `<p class="empty">${escapeHTML(t("noResponses"))}</p>`;
         return;
@@ -2406,36 +2760,85 @@
           </div>
         </div>
       `;
-      const cardsHTML = responses.map((r, index) => {
-        const respondent = displayName(r.respondentName, "noName");
-        const target = displayName(r.targetName, "noTarget");
-        const included = responseIsIncluded(r);
-        const upDisabled = index === 0 ? " disabled" : "";
-        const downDisabled = index === responses.length - 1 ? " disabled" : "";
+
+      const responseEntries = responses.map((r, index) => ({ response: r, index }));
+      const groupsHTML = responseGroups.map(groupName => {
+        const groupEntries = responseEntries.filter(item => normalizeGroupName(item.response.groupName) === groupName);
+        const groupTitle = displayGroupName(groupName);
+        const groupCount = groupEntries.length;
+        const isDefaultGroup = groupName === DEFAULT_RESPONSE_GROUP;
+        const groupIncludedState = getGroupIncludedState(groupName);
+        const groupToggleControl = `
+          <label class="response-group-include-label" aria-label="${escapeHTML(t("groupIncludeToggle"))}">
+            <input type="checkbox" data-response-group-toggle="${escapeHTML(groupName)}" data-indeterminate="${groupIncludedState.indeterminate ? "true" : "false"}"${groupIncludedState.checked ? " checked" : ""}${groupCount ? "" : " disabled"} aria-label="${escapeHTML(t("groupIncludeToggle"))}" />
+          </label>
+        `;
+        const groupControls = isDefaultGroup
+          ? `${groupToggleControl}`
+          : `
+            ${groupToggleControl}
+            <button type="button" class="plain" data-response-group-rename="${escapeHTML(groupName)}">${escapeHTML(t("renameResponseGroup"))}</button>
+            <button type="button" class="danger" data-response-group-delete="${escapeHTML(groupName)}">${escapeHTML(t("deleteResponseGroup"))}</button>
+          `;
+        const cardsHTML = groupEntries.length
+          ? groupEntries.map(({ response: r, index }, localIndex) => {
+              const respondent = displayName(r.respondentName, "noName");
+              const target = displayName(r.targetName, "noTarget");
+              const included = responseIsIncluded(r);
+              const upDisabled = localIndex === 0 ? " disabled" : "";
+              const downDisabled = localIndex === groupEntries.length - 1 ? " disabled" : "";
+              return `
+                <article class="response-card${included ? "" : " excluded"}" data-response-index="${index}" data-response-id="${escapeHTML(r.id)}" draggable="true">
+                  <div class="response-card-head">
+                    <div class="response-card-head-main">
+                      <label class="response-include-label">
+                        <input type="checkbox" data-response-toggle="${index}" ${included ? "checked" : ""} />
+                        <span>${escapeHTML(included ? t("includeResponse") : t("excludeResponse"))}</span>
+                      </label>
+                      <h3>${escapeHTML(`${localIndex + 1}. ${t("responseCardTitle", { name: respondent })}`)}</h3>
+                    </div>
+                    <div class="response-card-controls" data-export-ignore>
+                      <button type="button" class="plain response-move-btn" data-response-index="${index}" data-response-move="-1"${upDisabled}>${escapeHTML(t("moveResponseUp"))}</button>
+                      <button type="button" class="plain response-move-btn" data-response-index="${index}" data-response-move="1"${downDisabled}>${escapeHTML(t("moveResponseDown"))}</button>
+                      <button type="button" class="danger delete-response-btn" data-response-index="${index}" aria-label="${escapeHTML(t("responseDeleteAria", { name: respondent }))}">${escapeHTML(t("responseDeleteButton"))}</button>
+                    </div>
+                  </div>
+                  <p class="small">${escapeHTML(t("responseDescription", { respondent, target }))}</p>
+                  <div class="pill-list">
+                    ${r.picks.map(idx => `<span class="pill">${adjectiveStackHTML(idx)}</span>`).join("")}
+                  </div>
+                </article>
+              `;
+            }).join("")
+          : `<div class="response-group-empty">${escapeHTML(t("responseGroupEmpty"))}</div>`;
         return `
-          <article class="response-card${included ? "" : " excluded"}" data-response-index="${index}">
-            <div class="response-card-head">
-              <div class="response-card-head-main">
-                <label class="response-include-label">
-                  <input type="checkbox" data-response-toggle="${index}" ${included ? "checked" : ""} />
-                  <span>${escapeHTML(included ? t("includeResponse") : t("excludeResponse"))}</span>
-                </label>
-                <h3>${escapeHTML(`${index + 1}. ${t("responseCardTitle", { name: respondent })}`)}</h3>
+          <section class="response-group" data-response-group="${escapeHTML(groupName)}">
+            <div class="response-group-head">
+              <div class="response-group-title">
+                <h4>${escapeHTML(groupTitle)}</h4>
+                <span class="count-badge">${escapeHTML(t("responseGroupCount", { count: groupCount }))}</span>
               </div>
-              <div class="response-card-controls" data-export-ignore>
-                <button type="button" class="plain response-move-btn" data-response-index="${index}" data-response-move="-1"${upDisabled}>${escapeHTML(t("moveResponseUp"))}</button>
-                <button type="button" class="plain response-move-btn" data-response-index="${index}" data-response-move="1"${downDisabled}>${escapeHTML(t("moveResponseDown"))}</button>
-                <button type="button" class="danger delete-response-btn" data-response-index="${index}" aria-label="${escapeHTML(t("responseDeleteAria", { name: respondent }))}">${escapeHTML(t("responseDeleteButton"))}</button>
-              </div>
+              <div class="response-group-actions" data-export-ignore>${groupControls}</div>
             </div>
-            <p class="small">${escapeHTML(t("responseDescription", { respondent, target }))}</p>
-            <div class="pill-list">
-              ${r.picks.map(idx => `<span class="pill">${adjectiveStackHTML(idx)}</span>`).join("")}
+            <div class="response-group-dropzone" data-response-group="${escapeHTML(groupName)}">
+              ${cardsHTML}
             </div>
-          </article>
+          </section>
         `;
       }).join("");
-      $("#responseList").innerHTML = toolbarHTML + cardsHTML;
+
+      const groupFormHTML = `
+        <div class="response-group-add-panel" data-export-ignore>
+          <h4>${escapeHTML(t("addResponseGroupTitle"))}</h4>
+          <div class="response-group-form">
+            <input id="newResponseGroupInput" type="text" placeholder="${escapeHTML(t("responseGroupInputPlaceholder"))}" aria-label="${escapeHTML(t("responseGroupNamePrompt"))}" />
+            <button type="button" class="plain" data-response-group-add="true">${escapeHTML(t("addResponseGroup"))}</button>
+          </div>
+        </div>
+      `;
+
+      $("#responseList").innerHTML = toolbarHTML + `<div class="response-group-list">${groupsHTML}</div>` + groupFormHTML;
+      syncGroupIncludeCheckboxes();
     }
 
     function deleteResponseAt(index) {
@@ -2931,12 +3334,36 @@
       });
 
       $("#responseList").addEventListener("change", (e) => {
+        const groupCheckbox = e.target.closest("[data-response-group-toggle]");
+        if (groupCheckbox) {
+          setGroupResponsesIncluded(groupCheckbox.dataset.responseGroupToggle, groupCheckbox.checked);
+          return;
+        }
         const checkbox = e.target.closest("[data-response-toggle]");
         if (!checkbox) return;
         toggleResponseIncluded(Number(checkbox.dataset.responseToggle), checkbox.checked);
       });
 
       $("#responseList").addEventListener("click", (e) => {
+        const addGroupBtn = e.target.closest("[data-response-group-add]");
+        if (addGroupBtn) {
+          const input = $("#newResponseGroupInput");
+          if (addResponseGroup(input ? input.value : "")) {
+            const nextInput = $("#newResponseGroupInput");
+            if (nextInput) nextInput.value = "";
+          }
+          return;
+        }
+        const renameGroupBtn = e.target.closest("[data-response-group-rename]");
+        if (renameGroupBtn) {
+          renameResponseGroup(renameGroupBtn.dataset.responseGroupRename);
+          return;
+        }
+        const deleteGroupBtn = e.target.closest("[data-response-group-delete]");
+        if (deleteGroupBtn) {
+          deleteResponseGroup(deleteGroupBtn.dataset.responseGroupDelete);
+          return;
+        }
         const selectAllBtn = e.target.closest("[data-response-select-all]");
         if (selectAllBtn) {
           setAllResponsesIncluded(selectAllBtn.dataset.responseSelectAll === "true");
@@ -2950,6 +3377,64 @@
         const deleteBtn = e.target.closest(".delete-response-btn");
         if (!deleteBtn) return;
         deleteResponseAt(Number(deleteBtn.dataset.responseIndex));
+      });
+
+      $("#responseList").addEventListener("keydown", (e) => {
+        if (e.key !== "Enter") return;
+        const input = e.target.closest("#newResponseGroupInput");
+        if (!input) return;
+        e.preventDefault();
+        if (addResponseGroup(input.value)) {
+          const nextInput = $("#newResponseGroupInput");
+          if (nextInput) nextInput.value = "";
+        }
+      });
+
+      $("#responseList").addEventListener("dragstart", (e) => {
+        const card = e.target.closest(".response-card[data-response-id]");
+        if (!card) return;
+        draggedResponseId = card.dataset.responseId;
+        card.classList.add("dragging");
+        if (e.dataTransfer) {
+          e.dataTransfer.effectAllowed = "move";
+          e.dataTransfer.setData("text/plain", draggedResponseId);
+        }
+      });
+
+      $("#responseList").addEventListener("dragend", () => {
+        draggedResponseId = null;
+        $$(".response-card.dragging").forEach(card => card.classList.remove("dragging"));
+        $$(".response-group, .response-group-dropzone").forEach(el => el.classList.remove("drag-over", "is-drag-target"));
+      });
+
+      $("#responseList").addEventListener("dragover", (e) => {
+        const dropzone = e.target.closest(".response-group-dropzone[data-response-group]");
+        if (!dropzone) return;
+        e.preventDefault();
+        if (e.dataTransfer) e.dataTransfer.dropEffect = "move";
+        dropzone.classList.add("is-drag-target");
+        const group = dropzone.closest(".response-group");
+        if (group) group.classList.add("drag-over");
+      });
+
+      $("#responseList").addEventListener("dragleave", (e) => {
+        const dropzone = e.target.closest(".response-group-dropzone[data-response-group]");
+        if (!dropzone) return;
+        if (dropzone.contains(e.relatedTarget)) return;
+        dropzone.classList.remove("is-drag-target");
+        const group = dropzone.closest(".response-group");
+        if (group) group.classList.remove("drag-over");
+      });
+
+      $("#responseList").addEventListener("drop", (e) => {
+        const dropzone = e.target.closest(".response-group-dropzone[data-response-group]");
+        if (!dropzone) return;
+        e.preventDefault();
+        const responseId = (e.dataTransfer && e.dataTransfer.getData("text/plain")) || draggedResponseId;
+        const groupName = dropzone.dataset.responseGroup;
+        $$(".response-group, .response-group-dropzone").forEach(el => el.classList.remove("drag-over", "is-drag-target"));
+        draggedResponseId = null;
+        if (responseId && groupName) moveResponseToGroup(responseId, groupName);
       });
 
 
